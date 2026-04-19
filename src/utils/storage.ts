@@ -1,8 +1,7 @@
 import { createMMKV, type MMKV } from 'react-native-mmkv';
 
-const STORAGE_ID = 'linggoutong-storage';
+const STORAGE_ID = 'lingxi-storage';
 const JSON_PREFIX = '__MMKV_JSON__:';
-/** Older builds stored `null` as this string; still read for one-off migration. */
 const LEGACY_NULL_TOKEN = '__MMKV_NULL__';
 
 type PrimitiveValue = string | number | boolean;

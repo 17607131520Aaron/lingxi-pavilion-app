@@ -1,18 +1,21 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import React from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+
 import colors from '~/common/colors';
 
-type RootStackParamList = {
+import type { ParamListBase } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+interface RootStackParamList {
   home: undefined;
   login: undefined;
-  mine: undefined;  
+  mine: undefined;
   register: undefined;
   debug: undefined;
-};
+}
 
-type HomeNavigation = NativeStackNavigationProp<RootStackParamList, 'home'>;
+type HomeNavigation = NativeStackNavigationProp<ParamListBase>;
 
 const NAV_LINKS: { screen: keyof RootStackParamList; label: string }[] = [
   { screen: 'login', label: '去登录' },
@@ -31,12 +34,10 @@ const HomePages: React.FC = () => {
       {NAV_LINKS.map(({ screen, label }) => (
         <Pressable
           key={screen}
-          accessibilityRole="button"
-          style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => navigation.navigate(screen)}>
+          accessibilityRole='button'
+          style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+          onPress={() => navigation.navigate(screen)}
+        >
           <Text style={styles.buttonText}>{label}</Text>
         </Pressable>
       ))}

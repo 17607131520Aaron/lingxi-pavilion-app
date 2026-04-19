@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { FlatList, StyleSheet, View } from 'react-native';
+
 import colors from '~/common/colors';
+
 import ListItem from './ListItem';
 import useDebug from './useDebug';
 
@@ -31,9 +33,7 @@ const DebugPages: React.FC = () => {
     <View style={styles.listContent}>
       <FlatList
         data={DATA}
-        renderItem={({ item }) => (
-          <ListItem item={item} showSeparator={false} />
-        )}
+        renderItem={({ item }) => <ListItem item={item} showSeparator={false} />}
       />
     </View>
   );

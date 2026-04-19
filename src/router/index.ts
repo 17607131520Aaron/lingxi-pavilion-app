@@ -1,8 +1,8 @@
+import Debug from '~/pages/Debug';
 import Home from '~/pages/Home';
 import Login from '~/pages/Login';
 import Mine from '~/pages/Mine';
 import Register from '~/pages/Register';
-import Debug from '~/pages/Debug';
 
 const routers = [
   {

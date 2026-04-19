@@ -9,6 +9,11 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const config = {
   resolver: {
     sourceExts: ['js', 'ts', 'tsx', 'svg', 'json'],
+    extraNodeModules: {
+      stream: require.resolve('stream-browserify'),
+      'readable-stream': require.resolve('readable-stream'),
+      'react-native-url-polyfill': require.resolve('react-native-url-polyfill'),
+    },
   },
 };
 

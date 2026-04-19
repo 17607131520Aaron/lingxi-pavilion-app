@@ -2,6 +2,7 @@ import Home from '~/pages/Home';
 import Login from '~/pages/Login';
 import Mine from '~/pages/Mine';
 import Register from '~/pages/Register';
+import Debug from '~/pages/Debug';
 
 const routers = [
   {
@@ -27,6 +28,12 @@ const routers = [
     component: Register,
     showHeader: true,
     options: { title: '注册' },
+  },
+  {
+    name: 'debug',
+    component: Debug,
+    showHeader: true,
+    options: { title: '调试' },
   },
 ];
 

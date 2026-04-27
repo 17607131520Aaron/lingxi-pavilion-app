@@ -8,12 +8,13 @@ import React, { useEffect } from 'react';
 import { RootSiblingParent } from 'react-native-root-siblings';
 
 import routers from './router';
-import { subscribeRouteRedirect } from './utils/request';
+import { setupRequestSubscribers, subscribeRouteRedirect } from './utils/request';
 const RootStack = createNativeStackNavigator();
 const navigationRef = createNavigationContainerRef();
 
 const App: React.FC = () => {
   useEffect(() => {
+    const teardownRequestSubscribers = setupRequestSubscribers();
     const unsubscribe = subscribeRouteRedirect(({ routeName, params }) => {
       if (navigationRef.isReady()) {
         navigationRef.dispatch(
@@ -24,7 +25,10 @@ const App: React.FC = () => {
         );
       }
     });
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      teardownRequestSubscribers();
+    };
   }, []);
 
   return (

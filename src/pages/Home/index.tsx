@@ -7,21 +7,17 @@ import colors from '~/common/colors';
 import type { ParamListBase } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-interface RootStackParamList {
-  home: undefined;
-  login: undefined;
-  mine: undefined;
-  register: undefined;
-  debug: undefined;
-}
-
 type HomeNavigation = NativeStackNavigationProp<ParamListBase>;
 
-const NAV_LINKS: { screen: keyof RootStackParamList; label: string }[] = [
+const NAV_LINKS = [
   { screen: 'login', label: '去登录' },
   { screen: 'register', label: '去注册' },
   { screen: 'mine', label: '我的' },
   { screen: 'debug', label: '调试' },
+  {
+    screen: 'aiChat',
+    label: 'AI对话',
+  },
 ];
 
 const HomePages: React.FC = () => {

@@ -1,3 +1,4 @@
+import AiChat from '~/pages/aiChat';
 import Debug from '~/pages/Debug';
 import Home from '~/pages/Home';
 import Login from '~/pages/Login';
@@ -34,6 +35,12 @@ const routers = [
     component: Debug,
     showHeader: true,
     options: { title: '调试' },
+  },
+  {
+    name: 'aiChat',
+    component: AiChat,
+    showHeader: true,
+    options: { title: 'AI对话' },
   },
 ];
 

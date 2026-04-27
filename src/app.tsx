@@ -1,15 +1,35 @@
-import { NavigationContainer } from '@react-navigation/native';
+import {
+  CommonActions,
+  createNavigationContainerRef,
+  NavigationContainer,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RootSiblingParent } from 'react-native-root-siblings';
 
 import routers from './router';
+import { subscribeRouteRedirect } from './utils/request';
 const RootStack = createNativeStackNavigator();
+const navigationRef = createNavigationContainerRef();
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const unsubscribe = subscribeRouteRedirect(({ routeName, params }) => {
+      if (navigationRef.isReady()) {
+        navigationRef.dispatch(
+          CommonActions.navigate({
+            name: routeName,
+            params,
+          }),
+        );
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   return (
     <RootSiblingParent>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <RootStack.Navigator>
           {routers.map((item) => (
             <RootStack.Screen

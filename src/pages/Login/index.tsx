@@ -126,7 +126,7 @@ const LoginPage: FC = () => {
                   returnKeyType='next'
                   style={[styles.input, errors.account && styles.inputError]}
                   value={account}
-                  onChangeText={(v) => onChangeText(v)}
+                  onChangeText={(value) => onChangeText('account', value)}
                 />
                 {!!errors.account && <Text style={styles.errorText}>{errors.account}</Text>}
               </View>
@@ -141,7 +141,7 @@ const LoginPage: FC = () => {
                   returnKeyType='done'
                   style={[styles.input, errors.password && styles.inputError]}
                   value={password}
-                  onChangeText={(v) => onChangeText(v, 'password')}
+                  onChangeText={(value) => onChangeText('password', value)}
                   onSubmitEditing={handleLogin}
                 />
                 {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}

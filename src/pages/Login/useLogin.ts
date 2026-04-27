@@ -6,6 +6,11 @@ import STORAGE_KEYS from '~/common/storage-keys.ts';
 import { login } from '~/services/userServices.ts';
 import storage from '~/utils/storage.ts';
 
+interface LoginFormValues {
+  account: string;
+  password: string;
+}
+
 interface LoginFieldErrors {
   account?: string;
   password?: string;
@@ -20,27 +25,40 @@ const isAuthData = (value: unknown): value is { token: string; username: string 
   return typeof maybeAuthData.token === 'string' && typeof maybeAuthData.username === 'string';
 };
 
-const useLogin = () => {
+const useLogin = (): {
+  account: string;
+  password: string;
+  handleLogin: () => Promise<void>;
+  errors: LoginFieldErrors;
+  submitting: boolean;
+  canSubmit: boolean;
+  getToRegister: () => void;
+  onChangeText: (field: keyof LoginFormValues, value: string) => void;
+} => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const [account, setAccount] = useState('');
-  const [password, setPassword] = useState('');
+  const [formValues, setFormValues] = useState<LoginFormValues>({
+    account: '',
+    password: '',
+  });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<LoginFieldErrors>({});
+
+  const { account, password } = formValues;
 
   const canSubmit = useMemo(() => {
     return account.trim().length > 0 && password.length >= 6 && !submitting;
   }, [account, password, submitting]);
 
-  const validate = (): LoginFieldErrors => {
+  const validate = (values: LoginFormValues): LoginFieldErrors => {
     const next: LoginFieldErrors = {};
-    if (!account.trim()) next.account = '请输入手机号 / 邮箱 / 工号';
-    if (!password) next.password = '请输入密码';
-    if (password && password.length < 6) next.password = '密码至少 6 位';
+    if (!values.account.trim()) next.account = '请输入手机号 / 邮箱 / 工号';
+    if (!values.password) next.password = '请输入密码';
+    if (values.password && values.password.length < 6) next.password = '密码至少 6 位';
     return next;
   };
 
   const handleLogin = async (): Promise<void> => {
-    const nextErrors = validate();
+    const nextErrors = validate(formValues);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
@@ -52,9 +70,6 @@ const useLogin = () => {
         username,
         password,
       });
-
-      console.log(response, 'response');
-
       if (!isAuthData(response)) {
         throw new Error('登录响应格式异常，请稍后重试。');
       }
@@ -75,29 +90,24 @@ const useLogin = () => {
   };
 
   // 去注册
-  const getToRegister = () => {
+  const getToRegister = (): void => {
     navigation.navigate('Register');
   };
 
-  const onChangeText = (v: string, tyep = 'account') => {
-    setAccount(v);
+  const onChangeText = (field: keyof LoginFormValues, value: string): void => {
+    setFormValues((prev) => ({ ...prev, [field]: value }));
 
-    if (tyep === 'password' && errors.password) {
-      setErrors((prev) => ({ ...prev, password: undefined }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-
-    if (errors.account) setErrors((prev) => ({ ...prev, account: undefined }));
   };
 
   return {
     account,
     password,
     handleLogin,
-    setAccount,
-    setPassword,
     errors,
     submitting,
-    setErrors,
     canSubmit,
     getToRegister,
     onChangeText,

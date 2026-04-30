@@ -15,7 +15,8 @@ const HomePages: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       fetchUserInfo();
-    }, [fetchUserInfo]),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
   );
 
   return (

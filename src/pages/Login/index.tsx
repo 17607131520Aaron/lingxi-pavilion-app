@@ -1,4 +1,4 @@
-import { type FC, useState } from 'react';
+import { type FC } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -13,49 +13,29 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors.ts';
 import CustomButton from '~/components/CustomButton';
-import { sendSmsCode } from '~/services/userServices.ts';
 
 import styles from './index.style.ts';
 import useLogin from './useLogin.ts';
 
 const LoginPage: FC = () => {
-  const { phone, code, handleLogin, submitting, getToRegister, onChangeText } = useLogin();
-
-  const [passwordInput, setPasswordInput] = useState('');
-  const [isCodeLogin, setIsCodeLogin] = useState(true);
-  const [countdown, setCountdown] = useState(0);
-  const [obscurePassword, setObscurePassword] = useState(true);
-  const [isPhoneValid, setIsPhoneValid] = useState(false);
-
-  const handlePhoneChange = (text: string): void => {
-    onChangeText('phone', text);
-    setIsPhoneValid(text.length === 11);
-  };
-
-  const handleSendCode = async (): Promise<void> => {
-    if (!isPhoneValid || countdown > 0) return;
-
-    try {
-      await sendSmsCode({ phone: phone.trim() });
-      setCountdown(60);
-      const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : '发送验证码失败';
-      Alert.alert('发送失败', message);
-    }
-  };
-
-  const handleLoginPress = (): void => {
-    handleLogin();
-  };
+  const {
+    phone,
+    code,
+    submitting,
+    getToRegister,
+    onChangeText,
+    handlePhoneChange,
+    handleSendCode,
+    handleLoginPress,
+    passwordInput,
+    setPasswordInput,
+    isCodeLogin,
+    setIsCodeLogin,
+    countdown,
+    obscurePassword,
+    setObscurePassword,
+    isPhoneValid,
+  } = useLogin();
 
   const canLogin = isPhoneValid && (isCodeLogin ? code.length >= 4 : passwordInput.length >= 6);
 
@@ -100,8 +80,7 @@ const LoginPage: FC = () => {
                 <Pressable
                   style={styles.clearButton}
                   onPress={() => {
-                    onChangeText('phone', '');
-                    setIsPhoneValid(false);
+                    handlePhoneChange('');
                   }}
                 >
                   <Text style={styles.clearIcon}>✕</Text>

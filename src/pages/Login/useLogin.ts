@@ -3,17 +3,10 @@ import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
 import { login, type LoginData } from '~/services/userServices.ts';
+import { sendSmsCode } from '~/services/userServices.ts';
 import useAuthStore from '~/stores/useAuthStore.ts';
 
-interface LoginFormValues {
-  phone: string;
-  code: string;
-}
-
-interface LoginFieldErrors {
-  phone?: string;
-  code?: string;
-}
+import { type LoginFieldErrors, type LoginFormValues, type UseLoginReturn } from './types.ts';
 
 const isLoginData = (value: unknown): value is LoginData => {
   if (!value || typeof value !== 'object') {
@@ -27,16 +20,7 @@ const isLoginData = (value: unknown): value is LoginData => {
   );
 };
 
-const useLogin = (): {
-  phone: string;
-  code: string;
-  handleLogin: () => Promise<void>;
-  errors: LoginFieldErrors;
-  submitting: boolean;
-  canSubmit: boolean;
-  getToRegister: () => void;
-  onChangeText: (field: keyof LoginFormValues, value: string) => void;
-} => {
+const useLogin = (): UseLoginReturn => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { setTokens } = useAuthStore();
   const [formValues, setFormValues] = useState<LoginFormValues>({
@@ -45,6 +29,12 @@ const useLogin = (): {
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<LoginFieldErrors>({});
+
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isCodeLogin, setIsCodeLogin] = useState(true);
+  const [countdown, setCountdown] = useState(0);
+  const [obscurePassword, setObscurePassword] = useState(true);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
 
   const { phone, code } = formValues;
 
@@ -100,6 +90,36 @@ const useLogin = (): {
     }
   };
 
+  const handlePhoneChange = (text: string): void => {
+    onChangeText('phone', text);
+    setIsPhoneValid(text.length === 11);
+  };
+
+  const handleSendCode = async (): Promise<void> => {
+    if (!isPhoneValid || countdown > 0) return;
+
+    try {
+      await sendSmsCode({ phone: phone.trim() });
+      setCountdown(60);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '发送验证码失败';
+      Alert.alert('发送失败', message);
+    }
+  };
+
+  const handleLoginPress = (): void => {
+    handleLogin();
+  };
+
   return {
     phone,
     code,
@@ -109,6 +129,18 @@ const useLogin = (): {
     canSubmit,
     getToRegister,
     onChangeText,
+    handlePhoneChange,
+    handleSendCode,
+    handleLoginPress,
+    passwordInput,
+    setPasswordInput,
+    isCodeLogin,
+    setIsCodeLogin,
+    countdown,
+    setCountdown,
+    obscurePassword,
+    setObscurePassword,
+    isPhoneValid,
   };
 };
 

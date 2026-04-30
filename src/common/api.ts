@@ -15,17 +15,17 @@ export const ENV_KEY = {
 // 根据环境获取配置
 export const ENV_CONFING = Object.freeze({
   [ENV_KEY.TEST]: {
-    BASE_URL: 'http://172.23.101.190:9000',
+    BASE_URL: 'http://192.168.1.6:9000',
     AI_CHAT: '/ai/chat',
     AI_CHAT_SSE: '/ai/chat/sse',
   },
   [ENV_KEY.PRE]: {
-    BASE_URL: 'http://172.23.101.190:9000',
+    BASE_URL: 'http://192.168.1.6:9000',
     AI_CHAT: '/ai/chat',
     AI_CHAT_SSE: '/ai/chat/sse',
   },
   [ENV_KEY.PROD]: {
-    BASE_URL: 'http://172.23.101.190:9000',
+    BASE_URL: 'http://192.168.1.6:9000',
     AI_CHAT: '/ai/chat',
     AI_CHAT_SSE: '/ai/chat/sse',
   },

@@ -1,12 +1,16 @@
-import { type NavigationProp, type ParamListBase, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import {
+  type NavigationProp,
+  type ParamListBase,
+  useFocusEffect,
+  useNavigation,
+} from '@react-navigation/native';
+import React, { useCallback } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors';
-import STORAGE_KEYS from '~/common/storage-keys';
-import { getUserInfo, type UserInfo } from '~/services/userServices.ts';
-import storage from '~/utils/storage.ts';
+import useAuthStore from '~/stores/useAuthStore';
+import useUserStore from '~/stores/useUserStore';
 
 const MENU_ITEMS_1 = [
   { icon: '💬', label: '对话历史' },
@@ -24,22 +28,14 @@ const MENU_ITEMS_2 = [
 
 const MinePages: React.FC = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const { userInfo, fetchUserInfo, clearUserInfo } = useUserStore();
+  const { clearAuth } = useAuthStore();
 
-  useEffect(() => {
-    const fetchUserInfo = async (): Promise<void> => {
-      try {
-        const response = await getUserInfo();
-        if (response.data) {
-          setUserInfo(response.data);
-        }
-      } catch {
-        // 失败时静默处理
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserInfo();
+    }, [fetchUserInfo]),
+  );
 
   const handleLogout = (): void => {
     Alert.alert('确认退出', '确定要退出登录吗？', [
@@ -48,12 +44,8 @@ const MinePages: React.FC = () => {
         text: '确定',
         style: 'destructive',
         onPress: () => {
-          storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-          storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'login' }],
-          });
+          clearUserInfo();
+          clearAuth();
         },
       },
     ]);

@@ -1,12 +1,11 @@
-import { STORAGE_KEYS } from '~/common/storage-keys';
-import storage from '~/utils/storage';
+import useAuthStore from '~/stores/useAuthStore';
 
 export const getAuthToken = (): string | null => {
-  const token = storage.getItemSync<string>(STORAGE_KEYS.AUTH_TOKEN);
+  const { accessToken } = useAuthStore.getState();
 
-  if (!token || typeof token !== 'string') {
+  if (!accessToken || typeof accessToken !== 'string') {
     return null;
   }
 
-  return token;
+  return accessToken;
 };

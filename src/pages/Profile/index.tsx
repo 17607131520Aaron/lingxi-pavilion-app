@@ -1,35 +1,20 @@
 import { type NavigationProp, type ParamListBase, useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors';
-import STORAGE_KEYS from '~/common/storage-keys';
-import { getUserInfo, type UserInfo } from '~/services/userServices.ts';
-import storage from '~/utils/storage.ts';
+import useAuthStore from '~/stores/useAuthStore';
+import useUserStore from '~/stores/useUserStore';
 
 const ROLES = ['普通用户', '管理员', 'VIP会员', '企业用户'];
 
 const ProfilePage: React.FC = () => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const { userInfo, clearUserInfo } = useUserStore();
+  const { clearAuth } = useAuthStore();
   const [currentRole, setCurrentRole] = useState('普通用户');
   const [showRoleSheet, setShowRoleSheet] = useState(false);
-
-  useEffect(() => {
-    const fetchUserInfo = async (): Promise<void> => {
-      try {
-        const response = await getUserInfo();
-        if (response.data) {
-          setUserInfo(response.data);
-        }
-      } catch {
-        // 静默处理
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
 
   const maskPhone = (phone: string): string => {
     if (!phone || phone.length < 7) return phone || '--';
@@ -55,12 +40,8 @@ const ProfilePage: React.FC = () => {
         text: '确定',
         style: 'destructive',
         onPress: () => {
-          storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-          storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'login' }],
-          });
+          clearUserInfo();
+          clearAuth();
         },
       },
     ]);
@@ -72,12 +53,8 @@ const ProfilePage: React.FC = () => {
       {
         text: '确定',
         onPress: () => {
-          storage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-          storage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'login' }],
-          });
+          clearUserInfo();
+          clearAuth();
         },
       },
     ]);

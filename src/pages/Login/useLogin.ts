@@ -2,9 +2,8 @@ import { type NavigationProp, type ParamListBase, useNavigation } from '@react-n
 import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
-import STORAGE_KEYS from '~/common/storage-keys.ts';
 import { login, type LoginData } from '~/services/userServices.ts';
-import storage from '~/utils/storage.ts';
+import useAuthStore from '~/stores/useAuthStore.ts';
 
 interface LoginFormValues {
   phone: string;
@@ -39,6 +38,7 @@ const useLogin = (): {
   onChangeText: (field: keyof LoginFormValues, value: string) => void;
 } => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
+  const { setTokens } = useAuthStore();
   const [formValues, setFormValues] = useState<LoginFormValues>({
     phone: '',
     code: '',
@@ -78,11 +78,8 @@ const useLogin = (): {
         throw new Error('登录响应格式异常，请稍后重试。');
       }
 
-      storage.setItemSync(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken);
-      storage.setItemSync(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken);
-
+      setTokens(response.data.accessToken, response.data.refreshToken);
       Alert.alert('登录成功', '欢迎回来。');
-      navigation.goBack();
     } catch (error) {
       const message = error instanceof Error ? error.message : '登录失败，请稍后重试。';
       Alert.alert('登录失败', message);
@@ -91,7 +88,6 @@ const useLogin = (): {
     }
   };
 
-  // 去注册
   const getToRegister = (): void => {
     navigation.navigate('register');
   };

@@ -1,30 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback } from 'react';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors';
-import { getUserInfo, type UserInfo } from '~/services/userServices.ts';
+import useUserStore from '~/stores/useUserStore';
 
 import styles from './index.style';
 import { AI_TOOLS, CHAT_HISTORY } from './mockData';
 
 const HomePages: React.FC = () => {
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const { userInfo, fetchUserInfo } = useUserStore();
 
-  useEffect(() => {
-    const fetchUserInfo = async (): Promise<void> => {
-      try {
-        const response = await getUserInfo();
-        if (response.data) {
-          setUserInfo(response.data);
-        }
-      } catch {
-        // 静默处理
-      }
-    };
-
-    fetchUserInfo();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserInfo();
+    }, [fetchUserInfo]),
+  );
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>

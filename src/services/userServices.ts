@@ -15,14 +15,14 @@ export interface UserInfo {
 }
 
 export const sendSmsCode = (payload: { phone: string }): Promise<ApiResponse<void>> => {
-  return post<void>('/api/app/auth/sms-code', payload);
+  return post<void>('/app/auth/sms-code', payload);
 };
 
 export const login = (payload: {
   phone: string;
   code: string;
 }): Promise<ApiResponse<LoginData>> => {
-  return post<LoginData>('/api/app/auth/login', payload);
+  return post<LoginData>('/app/auth/login', payload);
 };
 
 export const register = (payload: {
@@ -30,9 +30,9 @@ export const register = (payload: {
   code: string;
   password: string;
 }): Promise<ApiResponse<void>> => {
-  return post<void>('/api/app/auth/register', payload);
+  return post<void>('/app/auth/register', payload);
 };
 
 export const getUserInfo = (): Promise<ApiResponse<UserInfo>> => {
-  return get<UserInfo>('/api/app/user/info');
+  return get<UserInfo>('/app/auth/info');
 };

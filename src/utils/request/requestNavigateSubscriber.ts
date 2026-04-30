@@ -1,4 +1,6 @@
 import { ROUTE_REDIRECT_KEYS } from '~/common/route-redirect';
+import useAuthStore from '~/stores/useAuthStore';
+import useUserStore from '~/stores/useUserStore';
 
 import { subscribeRequest } from './requestSubscriber';
 import { publishRouteRedirectByKey } from './routeRedirect';
@@ -30,6 +32,10 @@ const defaultUnauthorizedRule: RequestNavigateRule = {
     if (!isHttpUnauthorized && !isBusinessUnauthorized) {
       return false;
     }
+
+    // 清除认证状态和用户信息
+    useAuthStore.getState().clearAuth();
+    useUserStore.getState().clearUserInfo();
 
     navigateByKey(ROUTE_REDIRECT_KEYS.UNAUTHORIZED);
     return true;

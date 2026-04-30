@@ -12,8 +12,11 @@ import { RootSiblingParent } from 'react-native-root-siblings';
 import colors from './common/colors';
 import AiChat from './pages/aiChat';
 import Home from './pages/Home';
+import Login from './pages/Login';
 import Mine from './pages/Mine';
 import Profile from './pages/Profile';
+import Register from './pages/Register';
+import useAuthStore from './stores/useAuthStore';
 import { setupRequestSubscribers, subscribeRouteRedirect } from './utils/request';
 
 const RootStack = createNativeStackNavigator();
@@ -91,6 +94,8 @@ const MainTabs = (): React.JSX.Element => (
 );
 
 const App: React.FC = () => {
+  const { isAuthenticated } = useAuthStore();
+
   useEffect(() => {
     const teardownRequestSubscribers = setupRequestSubscribers();
     const unsubscribe = subscribeRouteRedirect(({ routeName, params }) => {
@@ -113,8 +118,17 @@ const App: React.FC = () => {
     <RootSiblingParent>
       <NavigationContainer ref={navigationRef}>
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
-          <RootStack.Screen component={MainTabs} name='main' />
-          <RootStack.Screen component={Profile} name='profile' />
+          {isAuthenticated ? (
+            <>
+              <RootStack.Screen component={MainTabs} name='main' />
+              <RootStack.Screen component={Profile} name='profile' />
+            </>
+          ) : (
+            <>
+              <RootStack.Screen component={Login} name='login' />
+              <RootStack.Screen component={Register} name='register' />
+            </>
+          )}
         </RootStack.Navigator>
       </NavigationContainer>
     </RootSiblingParent>

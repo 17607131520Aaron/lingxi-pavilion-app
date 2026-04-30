@@ -104,8 +104,6 @@ const colors = {
   purpleGradient: '#7B61FF',
   overlayBg: 'rgba(0,0,0,0.5)',
   white20: 'rgba(255,255,255,0.2)',
-  white70: 'rgba(255,255,255,0.7)',
-  white60: 'rgba(255,255,255,0.6)',
   goldAlpha: 'rgba(255,215,0,0.9)',
 } as const;
 

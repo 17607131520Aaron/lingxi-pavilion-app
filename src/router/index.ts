@@ -3,6 +3,7 @@ import Debug from '~/pages/Debug';
 import Home from '~/pages/Home';
 import Login from '~/pages/Login';
 import Mine from '~/pages/Mine';
+import Profile from '~/pages/Profile';
 import Register from '~/pages/Register';
 import Sparepart from '~/pages/sparepart';
 
@@ -10,7 +11,7 @@ const routers = [
   {
     name: 'home',
     component: Home,
-    showHeader: true,
+    showHeader: false,
     options: { title: '首页' },
   },
   {
@@ -24,6 +25,12 @@ const routers = [
     component: Mine,
     showHeader: false,
     options: { title: '我的' },
+  },
+  {
+    name: 'profile',
+    component: Profile,
+    showHeader: false,
+    options: { title: '个人信息' },
   },
   {
     name: 'register',

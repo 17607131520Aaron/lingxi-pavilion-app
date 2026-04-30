@@ -5,6 +5,7 @@ import { getEnvConfig } from '~/common/api';
 import { getAuthToken } from '~/utils/getUserStorage';
 
 import { notifyRequestSubscribers } from './requestSubscriber';
+// import { errorCodes, extractErrorMessage } from './utils';
 
 import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type {
@@ -78,6 +79,7 @@ const extractErrorMessage = (error: AxiosError<ApiResponse<unknown>>): string =>
   }
 
   const responseMessage = resolveResponseMessage(error.response?.data);
+
   if (error.response?.status === 401) {
     return responseMessage || '登录状态已失效，请重新登录';
   }

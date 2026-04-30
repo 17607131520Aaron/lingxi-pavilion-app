@@ -38,3 +38,6 @@ export const ENV_CONFING = Object.freeze({
 export const getEnvConfig = (key: string): EnvConfigItem | undefined => {
   return ENV_CONFING[key as keyof typeof ENV_CONFING];
 };
+
+// 当前环境配置（默认使用 test 环境）
+export const API_CONFIG = ENV_CONFING[ENV_KEY.TEST];

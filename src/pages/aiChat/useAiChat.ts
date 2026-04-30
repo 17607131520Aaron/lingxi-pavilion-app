@@ -9,8 +9,16 @@ const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).slice(2);
 };
 
-interface ChatResponse {
-  answer: string;
+interface ChatRequestMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+interface ChatRequest {
+  messages: ChatRequestMessage[];
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
 }
 
 const useAiChat = (): AiChatHook => {
@@ -22,7 +30,7 @@ const useAiChat = (): AiChatHook => {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const sessionIdRef = useRef<string>('');
+  const chatHistoryRef = useRef<ChatRequestMessage[]>([]);
 
   const addMessage = useCallback((message: Omit<ChatMessage, 'id' | 'timestamp'>) => {
     const newMessage: ChatMessage = {
@@ -84,33 +92,37 @@ const useAiChat = (): AiChatHook => {
 
       abortControllerRef.current = new AbortController();
 
-      addMessage({ role: 'user', content: content.trim() });
+      const userContent = content.trim();
+      addMessage({ role: 'user', content: userContent });
       const assistantMessageId = addMessage({ role: 'assistant', content: '', isTyping: true });
 
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
+      chatHistoryRef.current.push({ role: 'user', content: userContent });
+
       try {
-        const response = await post<ChatResponse>(
-          API_CONFIG.AI_CHAT,
-          {
-            sessionId: sessionIdRef.current || undefined,
-            message: content.trim(),
-            enableWebSearch: false,
-          },
-          {
-            skipErrorMessage: true,
-            skipStatusBroadcast: true,
-          },
-        );
+        const requestBody: ChatRequest = {
+          messages: chatHistoryRef.current,
+        };
+
+        const response = await post<string>(API_CONFIG.AI_CHAT, requestBody, {
+          skipErrorMessage: true,
+          skipStatusBroadcast: true,
+        });
 
         if (abortControllerRef.current?.signal.aborted) {
           return;
         }
 
-        const assistantContent = (response as ChatResponse).answer || '抱歉，我无法回答这个问题。';
+        const assistantContent = (response as string) || '抱歉，我无法回答这个问题。';
+
+        chatHistoryRef.current.push({ role: 'assistant', content: assistantContent });
+
         simulateTyping(assistantMessageId, assistantContent);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : '请求失败，请稍后重试';
+
+        chatHistoryRef.current.pop();
 
         updateMessage(assistantMessageId, {
           content: `抱歉，发生了错误：${errorMessage}`,
@@ -132,7 +144,7 @@ const useAiChat = (): AiChatHook => {
       clearTimeout(typingTimerRef.current);
     }
     abortControllerRef.current?.abort();
-    sessionIdRef.current = '';
+    chatHistoryRef.current = [];
     setState({
       messages: [],
       isLoading: false,

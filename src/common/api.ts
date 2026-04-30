@@ -16,18 +16,18 @@ export const ENV_KEY = {
 export const ENV_CONFING = Object.freeze({
   [ENV_KEY.TEST]: {
     BASE_URL: 'http://192.168.1.6:9000',
-    AI_CHAT: '/ai/chat',
-    AI_CHAT_SSE: '/ai/chat/sse',
+    AI_CHAT: '/api/app/ai/chat',
+    AI_CHAT_SSE: '/api/app/ai/chat/stream',
   },
   [ENV_KEY.PRE]: {
     BASE_URL: 'http://192.168.1.6:9000',
-    AI_CHAT: '/ai/chat',
-    AI_CHAT_SSE: '/ai/chat/sse',
+    AI_CHAT: '/api/app/ai/chat',
+    AI_CHAT_SSE: '/api/app/ai/chat/stream',
   },
   [ENV_KEY.PROD]: {
     BASE_URL: 'http://192.168.1.6:9000',
-    AI_CHAT: '/ai/chat',
-    AI_CHAT_SSE: '/ai/chat/sse',
+    AI_CHAT: '/api/app/ai/chat',
+    AI_CHAT_SSE: '/api/app/ai/chat/stream',
   },
 });
 

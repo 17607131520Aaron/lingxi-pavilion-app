@@ -40,8 +40,9 @@ const resolveResponseMessage = (payload?: Partial<ApiResponse<unknown>>): string
     return '请求失败，请稍后重试';
   }
 
-  if (typeof payload.messages === 'string' && payload.messages.trim()) {
-    return payload.messages;
+  const msg = payload.messages ?? payload.message;
+  if (typeof msg === 'string' && msg.trim()) {
+    return msg;
   }
 
   if ('code' in payload && payload.code !== undefined) {
@@ -58,7 +59,7 @@ const isBusinessResponse = <T>(value: unknown): value is ApiResponse<T> => {
   }
 
   const payload = value as Partial<ApiResponse<T>>;
-  return 'code' in payload && 'messages' in payload && 'data' in payload;
+  return 'code' in payload && ('messages' in payload || 'message' in payload) && 'data' in payload;
 };
 
 const normalizeSuccessPayload = <T>(payload: T): T => {

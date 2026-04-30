@@ -17,7 +17,8 @@ export type RequestConfig = InternalAxiosRequestConfig & RequestOptions;
 export interface ApiResponse<T = unknown> {
   code: number | string;
   data: T;
-  messages: string;
+  message?: string;
+  messages?: string;
 }
 
 export interface RequestOptions<TData = unknown> {

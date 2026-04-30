@@ -74,6 +74,7 @@ export const setupRequestNavigateSubscriber = (): (() => void) => {
   }
 
   const unsubscribe = subscribeRequest((event) => {
+    // eslint-disable-next-line no-void
     void handleRequestNavigateEvent(event);
   });
 

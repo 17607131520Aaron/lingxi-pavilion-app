@@ -7,6 +7,7 @@ import colors from '~/common/colors';
 import { ChatInput, MessageBubble, Welcome } from './components';
 import useAiChat from './useAiChat';
 
+import type { SelectedImage } from './components';
 import type { ChatMessage } from './types';
 import type { ListRenderItemInfo } from 'react-native';
 
@@ -23,8 +24,13 @@ const AiChatPage = (): React.JSX.Element => {
   }, [messages]);
 
   const handleSend = useCallback(
-    (content: string) => {
-      sendMessage(content);
+    (content: string, images?: SelectedImage[]) => {
+      if (images && images.length > 0) {
+        const imageBase64List = images.map((img) => img.base64);
+        sendMessage(content, imageBase64List);
+      } else {
+        sendMessage(content);
+      }
     },
     [sendMessage],
   );

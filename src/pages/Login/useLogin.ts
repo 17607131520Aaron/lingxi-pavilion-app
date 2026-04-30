@@ -40,17 +40,37 @@ const useLogin = (): UseLoginReturn => {
   const { submitting, passwordInput, isCodeLogin, countdown, obscurePassword, isPhoneValid } =
     uiState;
 
-  const validate = (values: LoginFormValues): LoginFieldErrors => {
+  const validate = (
+    values: LoginFormValues,
+    isCodeMode: boolean,
+    password: string,
+  ): LoginFieldErrors => {
     const next: LoginFieldErrors = {};
-    if (!values.phone.trim()) next.phone = '请输入手机号';
-    if (values.phone.trim().length !== 11) next.phone = '请输入正确的手机号';
-    if (!values.code) next.code = '请输入验证码';
-    if (values.code.length < 4) next.code = '验证码至少 4 位';
+    if (!values.phone.trim()) {
+      next.phone = '请输入手机号';
+    } else if (values.phone.trim().length !== 11) {
+      next.phone = '请输入正确的手机号';
+    }
+
+    if (isCodeMode) {
+      if (!values.code) {
+        next.code = '请输入验证码';
+      } else if (values.code.length < 4) {
+        next.code = '验证码至少 4 位';
+      }
+    } else {
+      if (!password) {
+        next.password = '请输入密码';
+      } else if (password.length < 6) {
+        next.password = '密码至少 6 位';
+      }
+    }
+
     return next;
   };
 
   const handleLogin = async (): Promise<void> => {
-    const nextErrors = validate(formValues);
+    const nextErrors = validate(formValues, isCodeLogin, passwordInput);
     if (Object.keys(nextErrors).length) return;
 
     updateUiState((draft) => {
@@ -61,13 +81,16 @@ const useLogin = (): UseLoginReturn => {
       const response = await login({
         phone: phone.trim(),
         code,
+        password: passwordInput.trim(),
       });
 
-      if (!response.data || !isLoginData(response.data)) {
-        throw new Error('登录响应格式异常，请稍后重试。');
-      }
+      console.log(response, 'response');
 
-      setTokens(response.data.accessToken, response.data.refreshToken);
+      // if (!response || !isLoginData(response.data)) {
+      //   throw new Error('登录响应格式异常，请稍后重试。');
+      // }
+
+      setTokens(response.accessToken, response.refreshToken);
       Alert.alert('登录成功', '欢迎回来。');
     } catch (error) {
       const message = error instanceof Error ? error.message : '登录失败，请稍后重试。';

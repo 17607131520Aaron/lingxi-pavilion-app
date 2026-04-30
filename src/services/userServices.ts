@@ -21,6 +21,7 @@ export const sendSmsCode = (payload: { phone: string }): Promise<ApiResponse<voi
 export const login = (payload: {
   phone: string;
   code: string;
+  password?: string;
 }): Promise<ApiResponse<LoginData>> => {
   return post<LoginData>('/app/auth/login', payload);
 };

@@ -2,6 +2,7 @@ export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  images?: string[];
   timestamp: number;
   isTyping?: boolean;
 }
@@ -13,7 +14,7 @@ export interface ChatState {
 }
 
 export interface AiChatHook extends ChatState {
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, images?: string[]) => Promise<void>;
   clearMessages: () => void;
   stopGenerating: () => void;
 }

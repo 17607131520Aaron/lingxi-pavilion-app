@@ -12,6 +12,7 @@ const generateId = (): string => {
 interface ChatRequestMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
+  images?: string[];
 }
 
 interface ChatRequest {
@@ -85,20 +86,20 @@ const useAiChat = (): AiChatHook => {
   );
 
   const sendMessage = useCallback(
-    async (content: string) => {
-      if (!content.trim() || state.isLoading) {
+    async (content: string, images?: string[]) => {
+      if ((!content.trim() && (!images || images.length === 0)) || state.isLoading) {
         return;
       }
 
       abortControllerRef.current = new AbortController();
 
       const userContent = content.trim();
-      addMessage({ role: 'user', content: userContent });
+      addMessage({ role: 'user', content: userContent, images });
       const assistantMessageId = addMessage({ role: 'assistant', content: '', isTyping: true });
 
       setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
-      chatHistoryRef.current.push({ role: 'user', content: userContent });
+      chatHistoryRef.current.push({ role: 'user', content: userContent, images });
 
       try {
         const requestBody: ChatRequest = {

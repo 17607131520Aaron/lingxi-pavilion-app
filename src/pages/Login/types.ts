@@ -6,6 +6,7 @@ export interface LoginFormValues {
 export interface LoginFieldErrors {
   phone?: string;
   code?: string;
+  password?: string;
 }
 
 export interface UseLoginReturn {

@@ -1,6 +1,6 @@
 import Icon from '@react-native-vector-icons/material-design-icons';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import colors from '~/common/colors';
 
@@ -12,6 +12,7 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === 'user';
+  const hasImages = message.images && message.images.length > 0;
 
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}>
@@ -21,10 +22,28 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         </View>
       )}
       <View style={[styles.bubble, isUser ? styles.userBubble : styles.assistantBubble]}>
-        <Text style={[styles.text, isUser ? styles.userText : styles.assistantText]}>
-          {message.content}
-          {message.isTyping && <TypingIndicator />}
-        </Text>
+        {hasImages && (
+          <View style={styles.imageContainer}>
+            {message.images?.map((imageUri, index) => (
+              <Image
+                key={`${imageUri}-${index}`}
+                source={{ uri: imageUri }}
+                style={styles.messageImage}
+              />
+            ))}
+          </View>
+        )}
+        {message.content ? (
+          <Text style={[styles.text, isUser ? styles.userText : styles.assistantText]}>
+            {message.content}
+            {message.isTyping && <TypingIndicator />}
+          </Text>
+        ) : null}
+        {!message.content && message.isTyping && (
+          <Text style={[styles.text, isUser ? styles.userText : styles.assistantText]}>
+            <TypingIndicator />
+          </Text>
+        )}
       </View>
       {isUser && (
         <View style={[styles.avatar, styles.userAvatar]}>
@@ -78,6 +97,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 16,
+  },
+  imageContainer: {
+    marginBottom: 8,
+    gap: 4,
+  },
+  messageImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    backgroundColor: colors.surfaceBackground,
   },
   userBubble: {
     backgroundColor: colors.brandPrimary,

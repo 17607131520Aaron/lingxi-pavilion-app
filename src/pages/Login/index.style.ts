@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 import colors from '~/common/colors';
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   flex: { flex: 1 },
   safeArea: {
     flex: 1,
@@ -223,4 +223,96 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
+export const modalStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: colors.overlayBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  container: {
+    width: '80%',
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 20,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: 14,
+    color: colors.antTextSecondary,
+    marginBottom: 8,
+  },
+  protocolRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  protocolItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  protocolItemSpacing: {
+    marginRight: 24,
+  },
+  protocolRadio: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  protocolRadioActive: {
+    borderColor: colors.antPrimary,
+  },
+  protocolRadioInactive: {
+    borderColor: colors.antBorderPrimary,
+  },
+  protocolRadioDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors.antPrimary,
+  },
+  protocolText: {
+    fontSize: 14,
+    color: colors.antTextPrimary,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: colors.antBorderPrimary,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    marginBottom: 16,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  resetButton: {
+    backgroundColor: colors.antBgSecondary,
+    marginRight: 8,
+  },
+  saveButton: {
+    backgroundColor: colors.antPrimary,
+    marginLeft: 8,
+  },
+  resetButtonText: {
+    color: colors.antTextSecondary,
+  },
+  saveButtonText: {
+    color: colors.white,
+  },
+});

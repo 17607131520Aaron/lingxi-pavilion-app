@@ -1,6 +1,8 @@
-import { type FC } from 'react';
+import { type FC, useCallback, useRef, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -12,11 +14,68 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors.ts';
 import CustomButton from '~/components/CustomButton';
+import storage from '~/utils/storage.ts';
 
-import styles from './index.style.ts';
+import { modalStyles, styles } from './index.style.ts';
 import useLogin from './useLogin.ts';
 
+const API_URL_STORAGE_KEY = 'custom_api_base_url';
+
 const LoginPage: FC = () => {
+  const [showApiConfig, setShowApiConfig] = useState(false);
+  const [protocol, setProtocol] = useState<'http' | 'https'>('http');
+  const [host, setHost] = useState('');
+  const [port, setPort] = useState('');
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleLogoPress = useCallback(() => {
+    tapCountRef.current += 1;
+
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current);
+    }
+
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      const savedUrl = storage.getItemSync<string>(API_URL_STORAGE_KEY) ?? '';
+      if (savedUrl) {
+        try {
+          const url = new URL(savedUrl);
+          setProtocol(url.protocol === 'https:' ? 'https' : 'http');
+          setHost(url.hostname);
+          setPort(url.port || '');
+        } catch {
+          setProtocol('http');
+          setHost('');
+          setPort('');
+        }
+      } else {
+        setProtocol('http');
+        setHost('');
+        setPort('');
+      }
+      setShowApiConfig(true);
+      return;
+    }
+
+    tapTimerRef.current = setTimeout(() => {
+      tapCountRef.current = 0;
+    }, 500);
+  }, []);
+
+  const handleSaveApiUrl = useCallback(() => {
+    const trimmedHost = host.trim();
+    if (!trimmedHost) {
+      Alert.alert('错误', '请输入 IP 地址');
+      return;
+    }
+    const portStr = port.trim() ? `:${port.trim()}` : '';
+    const fullUrl = `${protocol}://${trimmedHost}${portStr}`;
+    storage.setItemSync(API_URL_STORAGE_KEY, fullUrl);
+    setShowApiConfig(false);
+    Alert.alert('提示', '配置已保存，重启应用后生效');
+  }, [protocol, host, port]);
   const {
     phone,
     code,
@@ -51,7 +110,7 @@ const LoginPage: FC = () => {
           showsVerticalScrollIndicator={false}
         >
           {/* Logo 部分 */}
-          <View style={styles.logoContainer}>
+          <Pressable style={styles.logoContainer} onPress={handleLogoPress}>
             <View style={styles.logoIconContainer}>
               <View style={styles.logoIcon}>
                 <Text style={styles.logoIconText}>✦</Text>
@@ -59,7 +118,7 @@ const LoginPage: FC = () => {
             </View>
             <Text style={styles.logoTitle}>领狗通 AI</Text>
             <Text style={styles.logoSubtitle}>智能助手，随时为您服务</Text>
-          </View>
+          </Pressable>
 
           {/* 手机号输入框 */}
           <View style={styles.inputContainer}>
@@ -193,6 +252,99 @@ const LoginPage: FC = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      <Modal
+        transparent
+        animationType='fade'
+        visible={showApiConfig}
+        onRequestClose={() => setShowApiConfig(false)}
+      >
+        <Pressable style={modalStyles.backdrop} onPress={() => setShowApiConfig(false)}>
+          <Pressable style={modalStyles.container} onPress={(e) => e.stopPropagation()}>
+            <Text style={modalStyles.title}>接口配置</Text>
+
+            <Text style={modalStyles.label}>协议</Text>
+            <View style={modalStyles.protocolRow}>
+              <Pressable
+                style={[modalStyles.protocolItem, modalStyles.protocolItemSpacing]}
+                onPress={() => setProtocol('http')}
+              >
+                <View
+                  style={[
+                    modalStyles.protocolRadio,
+                    protocol === 'http'
+                      ? modalStyles.protocolRadioActive
+                      : modalStyles.protocolRadioInactive,
+                  ]}
+                >
+                  {protocol === 'http' && <View style={modalStyles.protocolRadioDot} />}
+                </View>
+                <Text style={modalStyles.protocolText}>HTTP</Text>
+              </Pressable>
+
+              <Pressable style={modalStyles.protocolItem} onPress={() => setProtocol('https')}>
+                <View
+                  style={[
+                    modalStyles.protocolRadio,
+                    protocol === 'https'
+                      ? modalStyles.protocolRadioActive
+                      : modalStyles.protocolRadioInactive,
+                  ]}
+                >
+                  {protocol === 'https' && <View style={modalStyles.protocolRadioDot} />}
+                </View>
+                <Text style={modalStyles.protocolText}>HTTPS</Text>
+              </Pressable>
+            </View>
+
+            <Text style={modalStyles.label}>IP 地址</Text>
+            <TextInput
+              autoCapitalize='none'
+              autoCorrect={false}
+              keyboardType='url'
+              placeholder='如: 192.168.1.6'
+              placeholderTextColor={colors.antTextTertiary}
+              style={modalStyles.input}
+              value={host}
+              onChangeText={setHost}
+            />
+
+            <Text style={modalStyles.label}>端口</Text>
+            <TextInput
+              keyboardType='number-pad'
+              maxLength={5}
+              placeholder='如: 9000'
+              placeholderTextColor={colors.antTextTertiary}
+              style={modalStyles.input}
+              value={port}
+              onChangeText={setPort}
+            />
+
+            <View style={modalStyles.actionRow}>
+              <Pressable
+                style={[modalStyles.actionButton, modalStyles.resetButton]}
+                onPress={() => {
+                  storage.removeItem(API_URL_STORAGE_KEY);
+                  setProtocol('http');
+                  setHost('');
+                  setPort('');
+                  setShowApiConfig(false);
+                  Alert.alert('提示', '已恢复默认配置，重启应用后生效');
+                }}
+              >
+                <Text style={modalStyles.resetButtonText}>恢复默认</Text>
+              </Pressable>
+
+              <Pressable
+                style={[modalStyles.actionButton, modalStyles.saveButton]}
+                onPress={handleSaveApiUrl}
+              >
+                <Text style={modalStyles.saveButtonText}>保存</Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 };

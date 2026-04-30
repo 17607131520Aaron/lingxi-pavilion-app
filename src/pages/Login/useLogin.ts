@@ -1,12 +1,12 @@
 import { type NavigationProp, type ParamListBase, useNavigation } from '@react-navigation/native';
-import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
+import { useImmer } from 'use-immer';
 
 import { login, type LoginData } from '~/services/userServices.ts';
 import { sendSmsCode } from '~/services/userServices.ts';
 import useAuthStore from '~/stores/useAuthStore.ts';
 
-import { type LoginFieldErrors, type LoginFormValues, type UseLoginReturn } from './types.ts';
+import type { LoginFieldErrors, LoginFormValues, LoginUiState, UseLoginReturn } from './types.ts';
 
 const isLoginData = (value: unknown): value is LoginData => {
   if (!value || typeof value !== 'object') {
@@ -23,24 +23,22 @@ const isLoginData = (value: unknown): value is LoginData => {
 const useLogin = (): UseLoginReturn => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const { setTokens } = useAuthStore();
-  const [formValues, setFormValues] = useState<LoginFormValues>({
+  const [formValues, updateFormValues] = useImmer<LoginFormValues>({
     phone: '',
     code: '',
   });
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<LoginFieldErrors>({});
-
-  const [passwordInput, setPasswordInput] = useState('');
-  const [isCodeLogin, setIsCodeLogin] = useState(true);
-  const [countdown, setCountdown] = useState(0);
-  const [obscurePassword, setObscurePassword] = useState(true);
-  const [isPhoneValid, setIsPhoneValid] = useState(false);
+  const [uiState, updateUiState] = useImmer<LoginUiState>({
+    submitting: false,
+    passwordInput: '',
+    isCodeLogin: true,
+    countdown: 0,
+    obscurePassword: true,
+    isPhoneValid: false,
+  });
 
   const { phone, code } = formValues;
-
-  const canSubmit = useMemo(() => {
-    return phone.trim().length === 11 && code.length >= 4 && !submitting;
-  }, [phone, code, submitting]);
+  const { submitting, passwordInput, isCodeLogin, countdown, obscurePassword, isPhoneValid } =
+    uiState;
 
   const validate = (values: LoginFormValues): LoginFieldErrors => {
     const next: LoginFieldErrors = {};
@@ -53,10 +51,11 @@ const useLogin = (): UseLoginReturn => {
 
   const handleLogin = async (): Promise<void> => {
     const nextErrors = validate(formValues);
-    setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
-    setSubmitting(true);
+    updateUiState((draft) => {
+      draft.submitting = true;
+    });
 
     try {
       const response = await login({
@@ -74,7 +73,9 @@ const useLogin = (): UseLoginReturn => {
       const message = error instanceof Error ? error.message : '登录失败，请稍后重试。';
       Alert.alert('登录失败', message);
     } finally {
-      setSubmitting(false);
+      updateUiState((draft) => {
+        draft.submitting = false;
+      });
     }
   };
 
@@ -83,16 +84,40 @@ const useLogin = (): UseLoginReturn => {
   };
 
   const onChangeText = (field: keyof LoginFormValues, value: string): void => {
-    setFormValues((prev) => ({ ...prev, [field]: value }));
-
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
+    updateFormValues((draft) => {
+      draft[field] = value;
+    });
   };
 
   const handlePhoneChange = (text: string): void => {
     onChangeText('phone', text);
-    setIsPhoneValid(text.length === 11);
+    updateUiState((draft) => {
+      draft.isPhoneValid = text.length === 11;
+    });
+  };
+
+  const handlePasswordChange = (text: string): void => {
+    updateUiState((draft) => {
+      draft.passwordInput = text;
+    });
+  };
+
+  const handleClearPassword = (): void => {
+    updateUiState((draft) => {
+      draft.passwordInput = '';
+    });
+  };
+
+  const handleToggleLoginMode = (): void => {
+    updateUiState((draft) => {
+      draft.isCodeLogin = !draft.isCodeLogin;
+    });
+  };
+
+  const handleTogglePasswordVisibility = (): void => {
+    updateUiState((draft) => {
+      draft.obscurePassword = !draft.obscurePassword;
+    });
   };
 
   const handleSendCode = async (): Promise<void> => {
@@ -100,14 +125,17 @@ const useLogin = (): UseLoginReturn => {
 
     try {
       await sendSmsCode({ phone: phone.trim() });
-      setCountdown(60);
+      updateUiState((draft) => {
+        draft.countdown = 60;
+      });
       const timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
+        updateUiState((draft) => {
+          if (draft.countdown <= 1) {
             clearInterval(timer);
-            return 0;
+            draft.countdown = 0;
+            return;
           }
-          return prev - 1;
+          draft.countdown -= 1;
         });
       }, 1000);
     } catch (error) {
@@ -123,23 +151,20 @@ const useLogin = (): UseLoginReturn => {
   return {
     phone,
     code,
-    handleLogin,
-    errors,
     submitting,
-    canSubmit,
     getToRegister,
     onChangeText,
     handlePhoneChange,
+    handlePasswordChange,
+    handleClearPassword,
+    handleToggleLoginMode,
+    handleTogglePasswordVisibility,
     handleSendCode,
     handleLoginPress,
     passwordInput,
-    setPasswordInput,
     isCodeLogin,
-    setIsCodeLogin,
     countdown,
-    setCountdown,
     obscurePassword,
-    setObscurePassword,
     isPhoneValid,
   };
 };

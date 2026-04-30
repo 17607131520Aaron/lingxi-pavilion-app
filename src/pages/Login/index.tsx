@@ -1,6 +1,5 @@
 import { type FC } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -25,15 +24,16 @@ const LoginPage: FC = () => {
     getToRegister,
     onChangeText,
     handlePhoneChange,
+    handlePasswordChange,
+    handleClearPassword,
+    handleToggleLoginMode,
+    handleTogglePasswordVisibility,
     handleSendCode,
     handleLoginPress,
     passwordInput,
-    setPasswordInput,
     isCodeLogin,
-    setIsCodeLogin,
     countdown,
     obscurePassword,
-    setObscurePassword,
     isPhoneValid,
   } = useLogin();
 
@@ -120,16 +120,16 @@ const LoginPage: FC = () => {
                   secureTextEntry={obscurePassword}
                   style={styles.passwordInput}
                   value={passwordInput}
-                  onChangeText={setPasswordInput}
+                  onChangeText={handlePasswordChange}
                 />
                 <Pressable
                   style={styles.togglePasswordButton}
-                  onPress={() => setObscurePassword(!obscurePassword)}
+                  onPress={handleTogglePasswordVisibility}
                 >
                   <Text style={styles.togglePasswordIcon}>{obscurePassword ? '👁️' : '👁️‍🗨️'}</Text>
                 </Pressable>
                 {passwordInput.length > 0 && (
-                  <Pressable style={styles.clearButton} onPress={() => setPasswordInput('')}>
+                  <Pressable style={styles.clearButton} onPress={handleClearPassword}>
                     <Text style={styles.clearIcon}>✕</Text>
                   </Pressable>
                 )}
@@ -139,7 +139,7 @@ const LoginPage: FC = () => {
 
           {/* 登录模式切换 */}
           <View style={styles.switchContainer}>
-            <Pressable onPress={() => setIsCodeLogin(!isCodeLogin)}>
+            <Pressable onPress={handleToggleLoginMode}>
               <Text style={styles.switchText}>{isCodeLogin ? '密码登录' : '验证码登录'}</Text>
             </Pressable>
           </View>

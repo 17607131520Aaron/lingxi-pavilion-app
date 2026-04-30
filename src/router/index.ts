@@ -27,7 +27,7 @@ const routers = [
   },
   {
     name: 'register',
-    component: true,
+    component: Register,
     showHeader: false,
     options: { title: '注册' },
   },

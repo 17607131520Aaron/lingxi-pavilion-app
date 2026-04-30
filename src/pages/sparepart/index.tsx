@@ -10,7 +10,7 @@ const Sparepart: React.FC = () => {
   const insets = useSafeAreaInsets();
   // 获取手机状态栏的高度
   return (
-    <LinearGradient colors={[]} locations={[0, 0.5, 1]}>
+    <LinearGradient colors={[colors.surfaceHeader, colors.surfaceHeaderLight]} locations={[0, 1]}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Text>备件</Text>
       </View>

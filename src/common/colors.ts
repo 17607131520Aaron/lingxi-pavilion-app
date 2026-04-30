@@ -71,6 +71,13 @@ const colors = {
   glowPurple: 'rgba(123, 97, 255, 0.26)',
   buttonDisabled1: '#3C4A6A',
   buttonDisabled2: '#2A3552',
+  chatBg: '#F7F6F4',
+  chatTextDark: '#30211F',
+  chatIcon: '#4A3832',
+  chatBenefitBg: '#E6E0FF',
+  chatBenefitTitle: '#4B3E78',
+  chatBenefitSubtitle: '#675E86',
+  chatBenefitButton: '#5A4A83',
 } as const;
 
 export default colors;

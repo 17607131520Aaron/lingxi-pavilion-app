@@ -1,37 +1,25 @@
 import React from 'react';
-import { StyleSheet, Text } from 'react-native';
-import { Bubble, GiftedChat } from 'react-native-gifted-chat';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import colors from '~/common/colors';
-
-import useAiChat from './useAiChat';
+import Input from '~/components/Input';
 
 const AiChatPage = (): React.JSX.Element => {
-  const { messages, onSend, isTyping, user } = useAiChat();
+  const handleSubmit = (values: string): boolean => {
+    Alert.alert('发送消息', values);
+    return true;
+  };
 
   return (
-    <SafeAreaView edges={['bottom']} style={styles.container}>
-      <GiftedChat
-        isTyping={isTyping}
-        messages={messages}
-        renderAvatar={null}
-        renderBubble={(props) => (
-          <Bubble
-            {...props}
-            wrapperStyle={{
-              left: styles.leftBubble,
-              right: styles.rightBubble,
-            }}
-          />
-        )}
-        renderFooter={() =>
-          isTyping ? <Text style={styles.typingText}>Lingxi AI 正在思考...</Text> : null
-        }
-        user={user}
-        onSend={onSend}
-      />
-    </SafeAreaView>
+    <View style={styles.container}>
+      <View style={styles.content}>
+        <Text>聊天内容部分</Text>
+      </View>
+
+      <View style={styles.footer}>
+        <Input isSend handleSubmit={handleSubmit} placeholder='请输入' />
+      </View>
+    </View>
   );
 };
 
@@ -40,17 +28,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.surfaceBackground,
   },
-  leftBubble: {
-    backgroundColor: colors.surfaceBackgroundSecondary,
+  content: {
+    flex: 1,
   },
-  rightBubble: {
-    backgroundColor: colors.brandPrimary,
-  },
-  typingText: {
-    marginLeft: 12,
-    marginBottom: 8,
-    color: colors.textMuted,
-    fontSize: 12,
+  footer: {
+    width: '100%',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
 });
 

@@ -10,6 +10,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import RNRestart from 'react-native-restart';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors.ts';
@@ -74,7 +75,9 @@ const LoginPage: FC = () => {
     const fullUrl = `${protocol}://${trimmedHost}${portStr}`;
     storage.setItemSync(API_URL_STORAGE_KEY, fullUrl);
     setShowApiConfig(false);
-    Alert.alert('提示', '配置已保存，重启应用后生效');
+    Alert.alert('提示', '配置已保存，正在重启应用...', [
+      { text: '确定', onPress: () => RNRestart.restart() },
+    ]);
   }, [protocol, host, port]);
   const {
     phone,
@@ -329,7 +332,9 @@ const LoginPage: FC = () => {
                   setHost('');
                   setPort('');
                   setShowApiConfig(false);
-                  Alert.alert('提示', '已恢复默认配置，重启应用后生效');
+                  Alert.alert('提示', '已恢复默认配置，正在重启应用...', [
+                    { text: '确定', onPress: () => RNRestart.restart() },
+                  ]);
                 }}
               >
                 <Text style={modalStyles.resetButtonText}>恢复默认</Text>

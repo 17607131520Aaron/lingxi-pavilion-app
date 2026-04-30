@@ -6947,6 +6947,11 @@ react-native-reanimated@^4.3.0:
     react-native-is-edge-to-edge "^1.3.1"
     semver "^7.7.3"
 
+react-native-restart@^0.0.27:
+  version "0.0.27"
+  resolved "https://registry.npmjs.org/react-native-restart/-/react-native-restart-0.0.27.tgz#43aa8210312c9dfa5ec7bd4b2f35238ad7972b19"
+  integrity sha512-8KScVICrXwcTSJ1rjWkqVTHyEKQIttm5AIMGSK1QG1+RS5owYlE4z/1DykOTdWfVl9l16FIk0w9Xzk9ZO6jxlA==
+
 react-native-root-siblings@^5.0.1:
   version "5.0.1"
   resolved "https://registry.npmjs.org/react-native-root-siblings/-/react-native-root-siblings-5.0.1.tgz#97e050e5155228f65810fb1c466ff8e769c5272c"

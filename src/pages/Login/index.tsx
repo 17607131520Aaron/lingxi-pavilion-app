@@ -1,12 +1,9 @@
-import { type FC, useEffect, useMemo } from 'react';
+import { type FC, useState } from 'react';
 import {
-  Alert,
-  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -16,352 +13,212 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '~/common/colors.ts';
 import CustomButton from '~/components/CustomButton';
 
+import styles from './index.style.ts';
 import useLogin from './useLogin.ts';
 
 const LoginPage: FC = () => {
-  const {
-    account,
-    handleLogin,
-    errors,
-    submitting,
-    canSubmit,
-    getToRegister,
-    onChangeText,
-    password,
-  } = useLogin();
+  const { handleLogin, submitting, getToRegister } = useLogin();
 
-  const glowAnim = useMemo(() => new Animated.Value(0), []);
-  const gridAnim = useMemo(() => new Animated.Value(0), []);
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [isCodeLogin, setIsCodeLogin] = useState(true);
+  const [countdown, setCountdown] = useState(0);
+  const [obscurePassword, setObscurePassword] = useState(true);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
 
-  useEffect(() => {
-    const glowLoop = Animated.loop(
-      Animated.timing(glowAnim, {
-        toValue: 1,
-        duration: 6800,
-        useNativeDriver: true,
-      }),
-    );
-    const gridLoop = Animated.loop(
-      Animated.timing(gridAnim, {
-        toValue: 1,
-        duration: 12000,
-        useNativeDriver: true,
-      }),
-    );
-    glowLoop.start();
-    gridLoop.start();
-    return () => {
-      glowLoop.stop();
-      gridLoop.stop();
-    };
-  }, [glowAnim, gridAnim]);
+  const handlePhoneChange = (text: string): void => {
+    setPhone(text);
+    setIsPhoneValid(text.length === 11);
+  };
 
-  const glow1TranslateX = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [-40, 30] });
-  const glow1TranslateY = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [10, -20] });
-  const glow2TranslateX = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [20, -30] });
-  const glow2TranslateY = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [-10, 25] });
-  const gridTranslateY = gridAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -28] });
+  const handleSendCode = (): void => {
+    if (!isPhoneValid || countdown > 0) return;
+
+    // 模拟发送验证码
+    setCountdown(60);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleLoginPress = (): void => {
+    // 这里可以调用实际的登录逻辑
+    handleLogin();
+  };
+
+  const canLogin = isPhoneValid && (isCodeLogin ? code.length >= 4 : passwordInput.length >= 6);
 
   return (
-    <SafeAreaView edges={['top', 'bottom']} style={styles.safeArea}>
-      <View style={styles.root}>
-        <View style={styles.bgBase} />
-        <View pointerEvents='none' style={styles.bgNoise} />
-
-        <Animated.View
-          pointerEvents='none'
-          style={[
-            styles.grid,
-            {
-              transform: [{ translateY: gridTranslateY }],
-            },
-          ]}
-        />
-
-        <Animated.View
-          pointerEvents='none'
-          style={[
-            styles.glowBallCyan,
-            {
-              transform: [{ translateX: glow1TranslateX }, { translateY: glow1TranslateY }],
-            },
-          ]}
-        />
-        <Animated.View
-          pointerEvents='none'
-          style={[
-            styles.glowBallPurple,
-            {
-              transform: [{ translateX: glow2TranslateX }, { translateY: glow2TranslateY }],
-            },
-          ]}
-        />
-
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={styles.flex}
+    <SafeAreaView edges={['top']} style={styles.safeArea}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps='handled'
+          showsVerticalScrollIndicator={false}
         >
-          <ScrollView
-            contentContainerStyle={styles.content}
-            keyboardShouldPersistTaps='handled'
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.hero}>
-              <Text style={styles.brandLine}>BURLINGTON</Text>
-              <Text style={styles.title}>AI 智能登录</Text>
-              <Text style={styles.subtitle}>安全 · 快速 · 低打扰</Text>
-            </View>
+          {/* 返回按钮 */}
+          <View style={styles.header}>
+            <Pressable style={styles.backButton} onPress={() => {}}>
+              <Text style={styles.backIcon}>←</Text>
+            </Pressable>
+          </View>
 
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>欢迎回来</Text>
-
-              <View style={styles.field}>
-                <Text style={styles.label}>账号</Text>
-                <TextInput
-                  autoCapitalize='none'
-                  autoCorrect={false}
-                  keyboardType='email-address'
-                  placeholder='手机号 / 邮箱 / 工号'
-                  placeholderTextColor={colors.white35}
-                  returnKeyType='next'
-                  style={[styles.input, errors.account && styles.inputError]}
-                  value={account}
-                  onChangeText={(value) => onChangeText('account', value)}
-                />
-                {!!errors.account && <Text style={styles.errorText}>{errors.account}</Text>}
-              </View>
-
-              <View style={styles.field}>
-                <Text style={styles.label}>密码</Text>
-                <TextInput
-                  secureTextEntry
-                  autoCapitalize='none'
-                  placeholder='输入密码'
-                  placeholderTextColor={colors.white35}
-                  returnKeyType='done'
-                  style={[styles.input, errors.password && styles.inputError]}
-                  value={password}
-                  onChangeText={(value) => onChangeText('password', value)}
-                  onSubmitEditing={handleLogin}
-                />
-                {!!errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
-              </View>
-
-              <View style={styles.actions}>
-                <CustomButton
-                  disabled={!canSubmit}
-                  style={[styles.loginButton, !canSubmit && styles.loginButtonDisabled]}
-                  title={submitting ? '登录中...' : '登录'}
-                  onPress={handleLogin}
-                />
-
-                <View style={styles.linkRow}>
-                  <Pressable
-                    hitSlop={8}
-                    onPress={() => {
-                      Alert.alert('忘记密码', '请联系管理员或使用短信找回流程（待接入）。');
-                    }}
-                  >
-                    <Text style={styles.linkText}>忘记密码</Text>
-                  </Pressable>
-
-                  <View style={styles.linkDivider} />
-
-                  <Pressable hitSlop={8} onPress={getToRegister}>
-                    <Text style={styles.linkText}>去注册</Text>
-                  </Pressable>
-                </View>
+          {/* Logo 部分 */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logoIconContainer}>
+              <View style={styles.logoIcon}>
+                <Text style={styles.logoIconText}>✦</Text>
               </View>
             </View>
+            <Text style={styles.logoTitle}>领狗通 AI</Text>
+            <Text style={styles.logoSubtitle}>智能助手，随时为您服务</Text>
+          </View>
 
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                登录即代表你同意 <Text style={styles.footerLink}>用户协议</Text> 与{' '}
-                <Text style={styles.footerLink}>隐私政策</Text>
+          {/* 手机号输入框 */}
+          <View style={styles.inputContainer}>
+            <View style={styles.phoneInputRow}>
+              <Text style={styles.phonePrefix}>+86</Text>
+              <Text style={styles.phoneArrow}>▼</Text>
+              <View style={styles.phoneDivider} />
+              <TextInput
+                keyboardType='phone-pad'
+                maxLength={11}
+                placeholder='请输入手机号'
+                placeholderTextColor={colors.antTextQuaternary}
+                style={styles.phoneInput}
+                value={phone}
+                onChangeText={handlePhoneChange}
+              />
+              {phone.length > 0 && (
+                <Pressable
+                  style={styles.clearButton}
+                  onPress={() => {
+                    setPhone('');
+                    setIsPhoneValid(false);
+                  }}
+                >
+                  <Text style={styles.clearIcon}>✕</Text>
+                </Pressable>
+              )}
+            </View>
+          </View>
+
+          {/* 验证码/密码输入框 */}
+          <View style={styles.inputContainer}>
+            {isCodeLogin ? (
+              <View style={styles.codeInputRow}>
+                <TextInput
+                  keyboardType='number-pad'
+                  maxLength={6}
+                  placeholder='请输入验证码'
+                  placeholderTextColor={colors.antTextQuaternary}
+                  style={styles.codeInput}
+                  value={code}
+                  onChangeText={setCode}
+                />
+                <Pressable
+                  disabled={!isPhoneValid || countdown > 0}
+                  style={[styles.sendCodeButton, !isPhoneValid && styles.sendCodeButtonDisabled]}
+                  onPress={handleSendCode}
+                >
+                  <Text style={[styles.sendCodeText, !isPhoneValid && styles.sendCodeTextDisabled]}>
+                    {countdown > 0 ? `${countdown}s` : '获取验证码'}
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.passwordInputRow}>
+                <TextInput
+                  placeholder='请输入密码'
+                  placeholderTextColor={colors.antTextQuaternary}
+                  secureTextEntry={obscurePassword}
+                  style={styles.passwordInput}
+                  value={passwordInput}
+                  onChangeText={setPasswordInput}
+                />
+                <Pressable
+                  style={styles.togglePasswordButton}
+                  onPress={() => setObscurePassword(!obscurePassword)}
+                >
+                  <Text style={styles.togglePasswordIcon}>{obscurePassword ? '👁️' : '👁️‍🗨️'}</Text>
+                </Pressable>
+                {passwordInput.length > 0 && (
+                  <Pressable style={styles.clearButton} onPress={() => setPasswordInput('')}>
+                    <Text style={styles.clearIcon}>✕</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+          </View>
+
+          {/* 登录模式切换 */}
+          <View style={styles.switchContainer}>
+            <Pressable onPress={() => setIsCodeLogin(!isCodeLogin)}>
+              <Text style={styles.switchText}>{isCodeLogin ? '密码登录' : '验证码登录'}</Text>
+            </Pressable>
+          </View>
+
+          {/* 登录按钮 */}
+          <View style={styles.buttonContainer}>
+            <CustomButton
+              disabled={!canLogin || submitting}
+              style={[styles.loginButton, (!canLogin || submitting) && styles.loginButtonDisabled]}
+              title={submitting ? '登录中...' : '登录'}
+              onPress={handleLoginPress}
+            />
+          </View>
+
+          {/* 注册入口 */}
+          <View style={styles.registerContainer}>
+            <Pressable onPress={getToRegister}>
+              <Text style={styles.registerText}>
+                还没有账号？ <Text style={styles.registerLink}>去注册</Text>
               </Text>
+            </Pressable>
+          </View>
+
+          {/* 用户协议 */}
+          <View style={styles.agreementContainer}>
+            <Text style={styles.agreementText}>
+              登录即代表同意 <Text style={styles.agreementLink}>《用户协议》</Text> 和{' '}
+              <Text style={styles.agreementLink}>《隐私政策》</Text>
+            </Text>
+          </View>
+
+          {/* 第三方登录 */}
+          <View style={styles.thirdPartyContainer}>
+            <View style={styles.dividerContainer}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>其他登录方式</Text>
+              <View style={styles.dividerLine} />
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </View>
+
+            <View style={styles.thirdPartyButtons}>
+              <Pressable style={styles.thirdPartyButton} onPress={() => {}}>
+                <Text style={styles.thirdPartyIcon}>💬</Text>
+              </Pressable>
+              <Pressable style={styles.thirdPartyButton} onPress={() => {}}>
+                <Text style={styles.thirdPartyIcon}>🍎</Text>
+              </Pressable>
+              <Pressable style={styles.thirdPartyButton} onPress={() => {}}>
+                <Text style={styles.thirdPartyIcon}>🌐</Text>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  safeArea: { flex: 1, backgroundColor: colors.bg1 },
-  root: {
-    flex: 1,
-    backgroundColor: colors.bg1,
-  },
-  bgBase: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: colors.bg1,
-  },
-  bgNoise: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    opacity: 0.18,
-    backgroundColor: colors.transparent,
-  },
-  grid: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    opacity: 0.18,
-    backgroundColor: colors.transparent,
-    transform: [{ translateY: 0 }],
-  },
-  glowBallCyan: {
-    position: 'absolute',
-    top: -90,
-    left: -70,
-    width: 260,
-    height: 260,
-    borderRadius: 999,
-    backgroundColor: colors.neonCyan,
-    opacity: 0.14,
-  },
-  glowBallPurple: {
-    position: 'absolute',
-    bottom: -120,
-    right: -90,
-    width: 320,
-    height: 320,
-    borderRadius: 999,
-    backgroundColor: colors.neonPurple,
-    opacity: 0.16,
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: 18,
-    paddingTop: 26,
-    paddingBottom: 22,
-  },
-  hero: {
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  brandLine: {
-    color: colors.white60,
-    letterSpacing: 3.2,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  title: {
-    marginTop: 10,
-    fontSize: 28,
-    fontWeight: '800',
-    color: colors.white85,
-  },
-  subtitle: {
-    marginTop: 8,
-    color: colors.white66,
-    fontSize: 14,
-  },
-  card: {
-    marginTop: 10,
-    borderRadius: 18,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.white14,
-    backgroundColor: colors.cardBg,
-    shadowColor: colors.glowPurple,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 22,
-    overflow: 'hidden',
-  },
-
-  cardTitle: {
-    color: colors.white85,
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  field: {
-    marginBottom: 12,
-  },
-  label: {
-    marginBottom: 8,
-    color: colors.white66,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  input: {
-    height: 46,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    color: colors.white85,
-    backgroundColor: colors.fieldBg,
-    borderWidth: 1,
-    borderColor: colors.white10,
-  },
-  inputError: {
-    borderColor: colors.errorRed,
-  },
-  errorText: {
-    marginTop: 8,
-    color: colors.errorRed,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  actions: {
-    marginTop: 8,
-  },
-  loginButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
-    backgroundColor: colors.primary,
-    shadowColor: colors.glowPrimary,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.35,
-    shadowRadius: 18,
-    elevation: 6,
-  },
-  loginButtonDisabled: {
-    backgroundColor: colors.buttonDisabled1,
-  },
-  linkRow: {
-    marginTop: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  linkText: {
-    color: colors.linkBlue,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  linkDivider: {
-    width: 1,
-    height: 12,
-    backgroundColor: colors.white22,
-    marginHorizontal: 12,
-  },
-  footer: {
-    marginTop: 16,
-    alignItems: 'center',
-  },
-  footerText: {
-    color: colors.white55,
-    fontSize: 12,
-    textAlign: 'center',
-    lineHeight: 18,
-  },
-  footerLink: {
-    color: colors.white75,
-    fontWeight: '700',
-  },
-});
 
 export default LoginPage;

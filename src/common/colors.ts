@@ -78,6 +78,24 @@ const colors = {
   chatBenefitTitle: '#4B3E78',
   chatBenefitSubtitle: '#675E86',
   chatBenefitButton: '#5A4A83',
+
+  // Flutter Theme Colors (Ant Design Style)
+  antPrimary: '#1677FF',
+  antPrimaryLight: '#4096FF',
+  antPrimaryDark: '#0958D9',
+  antSuccess: '#52C41A',
+  antWarning: '#FAAD14',
+  antError: '#FF4D4F',
+  antInfo: '#1677FF',
+  antTextPrimary: '#333333',
+  antTextSecondary: '#666666',
+  antTextTertiary: '#999999',
+  antTextQuaternary: '#CCCCCC',
+  antBgPrimary: '#FFFFFF',
+  antBgSecondary: '#F5F5F5',
+  antBgTertiary: '#FAFAFA',
+  antBorderPrimary: '#E5E5E5',
+  antBorderSecondary: '#F0F0F0',
 } as const;
 
 export default colors;

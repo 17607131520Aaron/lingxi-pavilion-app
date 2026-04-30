@@ -4,6 +4,7 @@ import Home from '~/pages/Home';
 import Login from '~/pages/Login';
 import Mine from '~/pages/Mine';
 import Register from '~/pages/Register';
+import Sparepart from '~/pages/sparepart';
 
 const routers = [
   {
@@ -21,13 +22,13 @@ const routers = [
   {
     name: 'mine',
     component: Mine,
-    showHeader: true,
+    showHeader: false,
     options: { title: '我的' },
   },
   {
     name: 'register',
-    component: Register,
-    showHeader: true,
+    component: true,
+    showHeader: false,
     options: { title: '注册' },
   },
   {
@@ -41,6 +42,13 @@ const routers = [
     component: AiChat,
     showHeader: true,
     options: { title: 'AI对话' },
+  },
+  {
+    // 备件管理
+    name: 'spareparts',
+    component: Sparepart,
+    showHeader: false,
+    options: { title: '备件管理' },
   },
 ];
 

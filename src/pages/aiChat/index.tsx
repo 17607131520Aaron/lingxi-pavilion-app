@@ -5,14 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors';
 
-// import useAiChat from './useAiChat';
+import useAiChat from './useAiChat';
 
 const AiChatPage = (): React.JSX.Element => {
-  // const { messages, onSend, isTyping, user } = useAiChat();
+  const { messages, onSend, isTyping, user } = useAiChat();
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.container}>
-      {/* <GiftedChat
+      <GiftedChat
         isTyping={isTyping}
         messages={messages}
         renderAvatar={null}
@@ -30,7 +30,7 @@ const AiChatPage = (): React.JSX.Element => {
         }
         user={user}
         onSend={onSend}
-      /> */}
+      />
     </SafeAreaView>
   );
 };

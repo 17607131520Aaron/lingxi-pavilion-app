@@ -18,6 +18,11 @@ const NAV_LINKS = [
     screen: 'aiChat',
     label: 'AI对话',
   },
+  {
+    // 备件管理
+    screen: 'spareparts',
+    label: '备件管理',
+  },
 ];
 
 const HomePages: React.FC = () => {

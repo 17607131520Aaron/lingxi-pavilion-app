@@ -34,13 +34,17 @@ const App: React.FC = () => {
   return (
     <RootSiblingParent>
       <NavigationContainer ref={navigationRef}>
-        <RootStack.Navigator>
+        <RootStack.Navigator screenOptions={{ headerShown: false }}>
           {routers.map((item) => (
             <RootStack.Screen
               key={item.name}
               component={item.component}
               name={item.name}
-              options={item.options}
+              options={{
+                ...(item.options ?? {}),
+                // 页面级别控制：默认关闭，只有显式开启的页面才显示顶部导航栏
+                headerShown: item.showHeader ?? false,
+              }}
             />
           ))}
         </RootStack.Navigator>

@@ -66,13 +66,6 @@ const LoginPage: FC = () => {
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
         >
-          {/* 返回按钮 */}
-          <View style={styles.header}>
-            <Pressable style={styles.backButton} onPress={() => {}}>
-              <Text style={styles.backIcon}>←</Text>
-            </Pressable>
-          </View>
-
           {/* Logo 部分 */}
           <View style={styles.logoContainer}>
             <View style={styles.logoIconContainer}>

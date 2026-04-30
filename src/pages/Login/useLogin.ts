@@ -91,7 +91,7 @@ const useLogin = (): {
 
   // 去注册
   const getToRegister = (): void => {
-    navigation.navigate('Register');
+    navigation.navigate('register');
   };
 
   const onChangeText = (field: keyof LoginFormValues, value: string): void => {

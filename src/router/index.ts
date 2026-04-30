@@ -16,7 +16,7 @@ const routers = [
   {
     name: 'login',
     component: Login,
-    showHeader: true,
+    showHeader: false,
     options: { title: '登录' },
   },
   {

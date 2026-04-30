@@ -25,12 +25,12 @@ const RegisterPage: FC = () => {
   const [obscureConfirm, setObscureConfirm] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const handlePhoneChange = (text: string) => {
+  const handlePhoneChange = (text: string): void => {
     setPhone(text);
     setIsPhoneValid(text.length === 11);
   };
 
-  const handleSendCode = () => {
+  const handleSendCode = (): void => {
     if (!isPhoneValid || countdown > 0) return;
 
     // 模拟发送验证码
@@ -46,7 +46,7 @@ const RegisterPage: FC = () => {
     }, 1000);
   };
 
-  const getPasswordStrength = () => {
+  const getPasswordStrength = (): string => {
     if (password.length === 0) return '';
     if (password.length < 6) return '弱';
     if (password.length < 10) return '中';
@@ -72,7 +72,7 @@ const RegisterPage: FC = () => {
     }
   };
 
-  const getStrengthPercent = () => {
+  const getStrengthPercent = (): number => {
     const strength = getPasswordStrength();
     switch (strength) {
       case '弱':
@@ -89,7 +89,7 @@ const RegisterPage: FC = () => {
   const canRegister =
     isPhoneValid && code.length >= 4 && password.length >= 6 && password === confirmPassword;
 
-  const handleRegister = () => {
+  const handleRegister = (): void => {
     if (!canRegister || submitting) return;
 
     setSubmitting(true);
@@ -115,13 +115,6 @@ const RegisterPage: FC = () => {
           keyboardShouldPersistTaps='handled'
           showsVerticalScrollIndicator={false}
         >
-          {/* 返回按钮 */}
-          <View style={styles.header}>
-            <Pressable style={styles.backButton} onPress={() => {}}>
-              <Text style={styles.backIcon}>←</Text>
-            </Pressable>
-          </View>
-
           {/* 头部 */}
           <View style={styles.headerContainer}>
             <View style={styles.headerRow}>
@@ -338,23 +331,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 32,
-    paddingBottom: 40,
+    paddingHorizontal: 16,
+    paddingBottom: 12,
   },
-  header: {
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backIcon: {
-    fontSize: 24,
-    color: colors.antTextPrimary,
-  },
+
   headerContainer: {
     marginBottom: 32,
   },

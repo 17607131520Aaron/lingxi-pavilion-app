@@ -1,12 +1,23 @@
 import NetInfo from '@react-native-community/netinfo';
 import axios, { AxiosHeaders } from 'axios';
 
-import STORAGE_KEYS from '~/common/storage-keys';
-import storage from '~/utils/storage';
+import { getEnvConfig } from '~/common/api';
+import { getAuthToken } from '~/utils/getUserStorage';
 
 import { notifyRequestSubscribers } from './requestSubscriber';
 
 import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import type {
+  ApiResponse,
+  RequestConfig,
+  RequestInterceptorFulfilled,
+  RequestInterceptorRejected,
+  RequestOptions,
+  ResponseInterceptorFulfilled,
+  ResponseInterceptorRejected,
+} from '~/types/request';
+
+const envConfig = getEnvConfig('test');
 
 // 请求层职责：
 // 1. 统一创建 axios 实例
@@ -16,40 +27,7 @@ import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConf
 const DEFAULT_TIMEOUT = 10000;
 const SUCCESS_CODES = [0, 200, '0', '200'];
 const EMPTY_SUCCESS_PAYLOADS: readonly unknown[] = [null, undefined];
-const BASE_URL = 'http://172.23.101.190:9000';
-
-type RequestInterceptorFulfilled = (
-  config: InternalAxiosRequestConfig,
-) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>;
-type RequestInterceptorRejected = (error: AxiosError) => unknown;
-type ResponseInterceptorFulfilled<T = unknown> = (
-  response: AxiosResponse<T>,
-) => AxiosResponse<T> | Promise<AxiosResponse<T>>;
-type ResponseInterceptorRejected = (error: AxiosError) => unknown;
-
-type RequestConfig = InternalAxiosRequestConfig & RequestOptions;
-
-export interface ApiResponse<T = unknown> {
-  code: number | string;
-  data: T;
-  messages: string;
-}
-
-export interface RequestOptions<TData = unknown> {
-  url?: string;
-  method?: string;
-  data?: TData;
-  params?: Record<string, unknown>;
-  headers?: Record<string, string>;
-  timeout?: number;
-  baseURL?: string;
-  successCodes?: Array<number | string>;
-  withFullResponse?: boolean;
-  skipErrorMessage?: boolean;
-  skipStatusBroadcast?: boolean;
-  skipAuthToken?: boolean;
-  transformEmptyToTrue?: boolean;
-}
+const BASE_URL = envConfig?.BASE_URL;
 
 // 某些接口成功时不会返回 data，这里兼容成布尔成功态。
 const shouldTransformEmptyToTrue = (config?: RequestOptions): boolean =>
@@ -86,7 +64,6 @@ const normalizeSuccessPayload = <T>(payload: T): T => {
   if (EMPTY_SUCCESS_PAYLOADS.includes(payload)) {
     return true as T;
   }
-
   return payload;
 };
 
@@ -122,16 +99,6 @@ const extractErrorMessage = (error: AxiosError<ApiResponse<unknown>>): string =>
   }
 
   return responseMessage;
-};
-
-const getAuthToken = (): string | null => {
-  const token = storage.getItemSync<string>(STORAGE_KEYS.AUTH_TOKEN);
-
-  if (!token || typeof token !== 'string') {
-    return null;
-  }
-
-  return token;
 };
 
 const createHttpClient = (): AxiosInstance => {

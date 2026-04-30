@@ -1,5 +1,6 @@
 import { type FC, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -12,15 +13,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors.ts';
 import CustomButton from '~/components/CustomButton';
+import { sendSmsCode } from '~/services/userServices.ts';
 
 import styles from './index.style.ts';
 import useLogin from './useLogin.ts';
 
 const LoginPage: FC = () => {
-  const { handleLogin, submitting, getToRegister } = useLogin();
+  const { phone, code, handleLogin, submitting, getToRegister, onChangeText } = useLogin();
 
-  const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [isCodeLogin, setIsCodeLogin] = useState(true);
   const [countdown, setCountdown] = useState(0);
@@ -28,28 +28,32 @@ const LoginPage: FC = () => {
   const [isPhoneValid, setIsPhoneValid] = useState(false);
 
   const handlePhoneChange = (text: string): void => {
-    setPhone(text);
+    onChangeText('phone', text);
     setIsPhoneValid(text.length === 11);
   };
 
-  const handleSendCode = (): void => {
+  const handleSendCode = async (): Promise<void> => {
     if (!isPhoneValid || countdown > 0) return;
 
-    // 模拟发送验证码
-    setCountdown(60);
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    try {
+      await sendSmsCode({ phone: phone.trim() });
+      setCountdown(60);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '发送验证码失败';
+      Alert.alert('发送失败', message);
+    }
   };
 
   const handleLoginPress = (): void => {
-    // 这里可以调用实际的登录逻辑
     handleLogin();
   };
 
@@ -96,7 +100,7 @@ const LoginPage: FC = () => {
                 <Pressable
                   style={styles.clearButton}
                   onPress={() => {
-                    setPhone('');
+                    onChangeText('phone', '');
                     setIsPhoneValid(false);
                   }}
                 >
@@ -117,7 +121,7 @@ const LoginPage: FC = () => {
                   placeholderTextColor={colors.antTextQuaternary}
                   style={styles.codeInput}
                   value={code}
-                  onChangeText={setCode}
+                  onChangeText={(text) => onChangeText('code', text)}
                 />
                 <Pressable
                   disabled={!isPhoneValid || countdown > 0}

@@ -3,31 +3,34 @@ import { useMemo, useState } from 'react';
 import { Alert } from 'react-native';
 
 import STORAGE_KEYS from '~/common/storage-keys.ts';
-import { login } from '~/services/userServices.ts';
+import { login, type LoginData } from '~/services/userServices.ts';
 import storage from '~/utils/storage.ts';
 
 interface LoginFormValues {
-  account: string;
-  password: string;
+  phone: string;
+  code: string;
 }
 
 interface LoginFieldErrors {
-  account?: string;
-  password?: string;
+  phone?: string;
+  code?: string;
 }
 
-const isAuthData = (value: unknown): value is { token: string; username: string } => {
+const isLoginData = (value: unknown): value is LoginData => {
   if (!value || typeof value !== 'object') {
     return false;
   }
 
-  const maybeAuthData = value as { token?: unknown; username?: unknown };
-  return typeof maybeAuthData.token === 'string' && typeof maybeAuthData.username === 'string';
+  const maybeLoginData = value as { accessToken?: unknown; refreshToken?: unknown };
+  return (
+    typeof maybeLoginData.accessToken === 'string' &&
+    typeof maybeLoginData.refreshToken === 'string'
+  );
 };
 
 const useLogin = (): {
-  account: string;
-  password: string;
+  phone: string;
+  code: string;
   handleLogin: () => Promise<void>;
   errors: LoginFieldErrors;
   submitting: boolean;
@@ -37,23 +40,24 @@ const useLogin = (): {
 } => {
   const navigation = useNavigation<NavigationProp<ParamListBase>>();
   const [formValues, setFormValues] = useState<LoginFormValues>({
-    account: '',
-    password: '',
+    phone: '',
+    code: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<LoginFieldErrors>({});
 
-  const { account, password } = formValues;
+  const { phone, code } = formValues;
 
   const canSubmit = useMemo(() => {
-    return account.trim().length > 0 && password.length >= 6 && !submitting;
-  }, [account, password, submitting]);
+    return phone.trim().length === 11 && code.length >= 4 && !submitting;
+  }, [phone, code, submitting]);
 
   const validate = (values: LoginFormValues): LoginFieldErrors => {
     const next: LoginFieldErrors = {};
-    if (!values.account.trim()) next.account = '请输入手机号 / 邮箱 / 工号';
-    if (!values.password) next.password = '请输入密码';
-    if (values.password && values.password.length < 6) next.password = '密码至少 6 位';
+    if (!values.phone.trim()) next.phone = '请输入手机号';
+    if (values.phone.trim().length !== 11) next.phone = '请输入正确的手机号';
+    if (!values.code) next.code = '请输入验证码';
+    if (values.code.length < 4) next.code = '验证码至少 4 位';
     return next;
   };
 
@@ -63,21 +67,19 @@ const useLogin = (): {
     if (Object.keys(nextErrors).length) return;
 
     setSubmitting(true);
-    const username = account.trim();
 
     try {
       const response = await login({
-        username,
-        password,
+        phone: phone.trim(),
+        code,
       });
-      if (!isAuthData(response)) {
+
+      if (!response.data || !isLoginData(response.data)) {
         throw new Error('登录响应格式异常，请稍后重试。');
       }
 
-      storage.setItemSync(STORAGE_KEYS.AUTH_TOKEN, response.token);
-      storage.setItemSync(STORAGE_KEYS.USER_INFO, {
-        username: response.username,
-      });
+      storage.setItemSync(STORAGE_KEYS.AUTH_TOKEN, response.data.accessToken);
+      storage.setItemSync(STORAGE_KEYS.REFRESH_TOKEN, response.data.refreshToken);
 
       Alert.alert('登录成功', '欢迎回来。');
       navigation.goBack();
@@ -103,8 +105,8 @@ const useLogin = (): {
   };
 
   return {
-    account,
-    password,
+    phone,
+    code,
     handleLogin,
     errors,
     submitting,

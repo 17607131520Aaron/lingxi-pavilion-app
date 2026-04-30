@@ -1,8 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import colors from '~/common/colors';
+import { getUserInfo, type UserInfo } from '~/services/userServices.ts';
 
 import type { ParamListBase } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -27,10 +28,31 @@ const NAV_LINKS = [
 
 const HomePages: React.FC = () => {
   const navigation = useNavigation<HomeNavigation>();
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    const fetchUserInfo = async (): Promise<void> => {
+      try {
+        const response = await getUserInfo();
+        if (response.data) {
+          setUserInfo(response.data);
+        }
+      } catch {
+        // 获取用户信息失败时静默处理
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>首页</Text>
+      {userInfo && (
+        <View style={styles.userInfoContainer}>
+          <Text style={styles.userInfoText}>欢迎, {userInfo.nickname || userInfo.phone}</Text>
+        </View>
+      )}
       <Text style={styles.subtitle}>快捷入口</Text>
       {NAV_LINKS.map(({ screen, label }) => (
         <Pressable
@@ -57,6 +79,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.textMain,
     marginBottom: 8,
+  },
+  userInfoContainer: {
+    backgroundColor: `${colors.brandPrimary}1A`,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  userInfoText: {
+    fontSize: 14,
+    color: colors.brandPrimary,
   },
   subtitle: {
     fontSize: 14,

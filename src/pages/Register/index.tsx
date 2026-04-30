@@ -1,5 +1,6 @@
 import { type FC, useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import colors from '~/common/colors.ts';
 import CustomButton from '~/components/CustomButton';
+import { register, sendSmsCode } from '~/services/userServices.ts';
 
 const RegisterPage: FC = () => {
   const [phone, setPhone] = useState('');
@@ -30,20 +32,25 @@ const RegisterPage: FC = () => {
     setIsPhoneValid(text.length === 11);
   };
 
-  const handleSendCode = (): void => {
+  const handleSendCode = async (): Promise<void> => {
     if (!isPhoneValid || countdown > 0) return;
 
-    // 模拟发送验证码
-    setCountdown(60);
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    try {
+      await sendSmsCode({ phone: phone.trim() });
+      setCountdown(60);
+      const timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '发送验证码失败';
+      Alert.alert('发送失败', message);
+    }
   };
 
   const getPasswordStrength = (): string => {
@@ -58,7 +65,7 @@ const RegisterPage: FC = () => {
     return '弱';
   };
 
-  const getStrengthColor = () => {
+  const getStrengthColor = (): string => {
     const strength = getPasswordStrength();
     switch (strength) {
       case '弱':
@@ -89,15 +96,23 @@ const RegisterPage: FC = () => {
   const canRegister =
     isPhoneValid && code.length >= 4 && password.length >= 6 && password === confirmPassword;
 
-  const handleRegister = (): void => {
+  const handleRegister = async (): Promise<void> => {
     if (!canRegister || submitting) return;
 
     setSubmitting(true);
-    // 模拟注册请求
-    setTimeout(() => {
+    try {
+      await register({
+        phone: phone.trim(),
+        code,
+        password,
+      });
+      Alert.alert('注册成功', '请登录', [{ text: '确定', onPress: () => {} }]);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '注册失败，请稍后重试';
+      Alert.alert('注册失败', message);
+    } finally {
       setSubmitting(false);
-      // 这里可以添加注册成功后的逻辑
-    }, 1500);
+    }
   };
 
   const passwordStrength = getPasswordStrength();
@@ -481,7 +496,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   sendCodeButtonDisabled: {
-    backgroundColor: 'transparent',
+    backgroundColor: colors.transparent,
   },
   sendCodeButtonActive: {
     backgroundColor: `${colors.antPrimary}1A`,

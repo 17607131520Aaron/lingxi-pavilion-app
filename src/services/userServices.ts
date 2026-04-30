@@ -1,20 +1,38 @@
-import { type ApiResponse, post } from '~/utils/request';
+import { type ApiResponse, get, post } from '~/utils/request';
 
-export interface AuthData {
-  token: string;
-  username: string;
+export interface LoginData {
+  accessToken: string;
+  refreshToken: string;
 }
 
-export const login = async (payload: {
-  username: string;
-  password: string;
-}): Promise<AuthData | ApiResponse<AuthData>> => {
-  return post<AuthData>('/auth/login', payload);
+export interface UserInfo {
+  userId: number;
+  phone: string;
+  nickname: string;
+  avatar?: string;
+  email?: string;
+  createTime?: string;
+}
+
+export const sendSmsCode = (payload: { phone: string }): Promise<ApiResponse<void>> => {
+  return post<void>('/api/app/auth/sms-code', payload);
+};
+
+export const login = (payload: {
+  phone: string;
+  code: string;
+}): Promise<ApiResponse<LoginData>> => {
+  return post<LoginData>('/api/app/auth/login', payload);
 };
 
 export const register = (payload: {
-  username: string;
+  phone: string;
+  code: string;
   password: string;
-}): Promise<AuthData | ApiResponse<AuthData>> => {
-  return post<AuthData>('/auth/register', payload);
+}): Promise<ApiResponse<void>> => {
+  return post<void>('/api/app/auth/register', payload);
+};
+
+export const getUserInfo = (): Promise<ApiResponse<UserInfo>> => {
+  return get<UserInfo>('/api/app/user/info');
 };

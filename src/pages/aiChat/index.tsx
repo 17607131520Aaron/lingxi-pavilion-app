@@ -26,7 +26,13 @@ const AiChatPage = (): React.JSX.Element => {
   const handleSend = useCallback(
     (content: string, images?: SelectedImage[]) => {
       if (images && images.length > 0) {
-        const imageBase64List = images.map((img) => img.base64);
+        const imageBase64List = images.map((img) => {
+          const { base64 } = img;
+          if (base64.startsWith('data:')) {
+            return base64;
+          }
+          return `data:image/jpeg;base64,${base64}`;
+        });
         sendMessage(content, imageBase64List);
       } else {
         sendMessage(content);

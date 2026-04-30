@@ -24,10 +24,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       <View style={[styles.bubble, isUser ? styles.userBubble : styles.assistantBubble]}>
         {hasImages && (
           <View style={styles.imageContainer}>
-            {message.images?.map((imageUri, index) => (
+            {message.images?.map((imageData, index) => (
               <Image
-                key={`${imageUri}-${index}`}
-                source={{ uri: imageUri }}
+                key={`img-${index}`}
+                source={{
+                  uri: imageData.startsWith('data:')
+                    ? imageData
+                    : `data:image/jpeg;base64,${imageData}`,
+                }}
                 style={styles.messageImage}
               />
             ))}

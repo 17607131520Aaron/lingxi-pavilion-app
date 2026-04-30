@@ -40,7 +40,7 @@ const routers = [
   {
     name: 'aiChat',
     component: AiChat,
-    showHeader: true,
+    showHeader: false,
     options: { title: 'AI对话' },
   },
   {

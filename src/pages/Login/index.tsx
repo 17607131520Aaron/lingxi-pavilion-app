@@ -79,6 +79,7 @@ const LoginPage: FC = () => {
       { text: '确定', onPress: () => RNRestart.restart() },
     ]);
   }, [protocol, host, port]);
+
   const {
     phone,
     code,

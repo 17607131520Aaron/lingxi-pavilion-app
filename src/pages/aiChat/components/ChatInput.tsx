@@ -35,16 +35,18 @@ interface ChatInputProps {
   placeholder?: string;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({
-  onSend,
-  onStop,
-  onAddFile,
-  onWebSearchToggle,
-  onMic,
-  isLoading = false,
-  webSearchEnabled = false,
-  placeholder = '输入你的问题...',
-}) => {
+const ChatInput: React.FC<ChatInputProps> = (props) => {
+  const {
+    onSend,
+    onStop,
+    onAddFile,
+    onWebSearchToggle,
+    onMic,
+    isLoading = false,
+    webSearchEnabled = false,
+    placeholder = '输入你的问题...',
+  } = props;
+
   const [inputValue, setInputValue] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showAddMenu, setShowAddMenu] = useState(false);
@@ -130,8 +132,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
           }));
         setSelectedImages((prev) => [...prev, ...newImages]);
       }
-    } catch (error) {
-      console.log('Image picker error:', error);
+    } catch {
+      throw Error('报错了');
     }
   }, []);
 

@@ -33,11 +33,10 @@ const MainTabs = (): React.JSX.Element => {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          height: 44,
           borderTopWidth: 0.3,
           borderTopColor: colors.borderLight,
           backgroundColor: colors.white,
-          paddingVertical: 12,
+          height: 48,
         },
         tabBarShowLabel: false,
       }}

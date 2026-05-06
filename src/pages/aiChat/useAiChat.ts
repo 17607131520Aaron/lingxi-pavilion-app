@@ -140,7 +140,7 @@ const useAiChat = (): AiChatHook => {
     [state.isLoading, addMessage, updateMessage, simulateTyping],
   );
 
-  const clearMessages = useCallback(() => {
+  const clearMessages = (): void => {
     if (typingTimerRef.current) {
       clearTimeout(typingTimerRef.current);
     }
@@ -151,15 +151,15 @@ const useAiChat = (): AiChatHook => {
       isLoading: false,
       error: null,
     });
-  }, []);
+  };
 
-  const stopGenerating = useCallback(() => {
+  const stopGenerating = (): void => {
     if (typingTimerRef.current) {
       clearTimeout(typingTimerRef.current);
     }
     abortControllerRef.current?.abort();
     setState((prev) => ({ ...prev, isLoading: false }));
-  }, []);
+  };
 
   return {
     ...state,

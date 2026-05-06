@@ -1,14 +1,9 @@
 import React from 'react';
-import {
-  type GestureResponderEvent,
-  type StyleProp,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  type ViewStyle,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import colors from '~/common/colors';
+
+import type { GestureResponderEvent, StyleProp, ViewStyle } from 'react-native';
 
 interface CustomButtonProps {
   title: string;
@@ -17,15 +12,11 @@ interface CustomButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({
-  title,
-  onPress,
-  disabled = false,
-  style,
-}): React.JSX.Element => {
+const CustomButton: React.FC<CustomButtonProps> = (props): React.JSX.Element => {
+  const { title, onPress, disabled = false, style } = props;
   return (
     <TouchableOpacity
-      activeOpacity={0.7} // 点击时的透明度（默认0.2）
+      activeOpacity={0.7}
       disabled={disabled}
       style={[styles.buttonContainer, disabled && styles.disabledButton, style]}
       onPress={onPress}
@@ -39,13 +30,13 @@ const CustomButton: React.FC<CustomButtonProps> = ({
 const styles = StyleSheet.create({
   // 按钮容器样式
   buttonContainer: {
-    backgroundColor: colors.brandPrimary, // 背景色
-    borderRadius: 8, // 圆角
-    paddingVertical: 12, // 上下内边距
-    paddingHorizontal: 24, // 左右内边距
-    alignItems: 'center', // 文字水平居中
-    justifyContent: 'center', // 文字垂直居中
-    shadowColor: colors.black, // 阴影颜色（iOS）
+    backgroundColor: colors.brandPrimary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 2 }, // 阴影偏移
     shadowOpacity: 0.1, // 阴影透明度
     shadowRadius: 4, // 阴影圆角
@@ -53,18 +44,18 @@ const styles = StyleSheet.create({
   },
   // 禁用状态容器样式
   disabledButton: {
-    backgroundColor: colors.borderLight, // 禁用时背景色
-    elevation: 0, // 禁用时去掉阴影
+    backgroundColor: colors.borderLight,
+    elevation: 0,
   },
   // 按钮文字样式
   buttonText: {
-    color: colors.white, // 文字颜色
-    fontSize: 16, // 字体大小
-    fontWeight: '600', // 字体粗细
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
   // 禁用状态文字样式
   disabledText: {
-    color: colors.textSecondary, // 禁用时文字色
+    color: colors.textSecondary,
   },
 });
 
